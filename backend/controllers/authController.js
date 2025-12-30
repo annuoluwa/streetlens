@@ -24,10 +24,8 @@ const register = async (req, res) => {
         const newUser =await createUser(username, email, hashedPassword);
 
         //create JWT token
-
-        const token = jwt.sign({id: newUser.id }, process.env.JWT_SECRET, {expiresIn: '7d'});
-
-        res.status(201).json({user: newUser, token});
+        const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.status(201).json({ user: newUser, token });
     }catch(err) {
         console.error(err);
         res.status(500).json({message: 'Server error'});

@@ -1,10 +1,27 @@
 const express = require('express');
-const { createComment } = require('../controllers/commentController');
+const router = express.Router();
+const {
+  createReportComment,
+  getReportComments,
+  deleteReportComment
+} = require('../controllers/commentController');
+
 const { protect } = require('../middleware/protect');
 
-const router = express.Router();
+// Create comment on a report
+router.post(
+  '/reports/:reportId/comments',
+  protect,
+  createReportComment
+);
 
-// CREATE COMMENT
-router.post('/', protect, createComment);
+// Get comments for a report
+router.get(
+  '/reports/:reportId/comments',
+  getReportComments
+);
+
+// Delete a comment by id (protected)
+router.delete('/comments/:commentId', protect, deleteReportComment);
 
 module.exports = router;

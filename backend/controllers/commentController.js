@@ -1,25 +1,62 @@
-const db = require('../db/db');
+const {
+  createComment,
+  getCommentsByReportId,
+  deleteComment
+} = require('../models/commentModel');
 
-const createComment = async (req, res) => {
+const createReportComment = async (req, res) => {
   try {
-    const { content, postId, isAnonymous } = req.body;
+    const { reportId } = req.params;
+    const { content, isAnonymous, parent_comment_id } = req.body;
 
-    if (!content || !postId) {
-      return res.status(400).json({ message: 'Content and postId are required' });
+    if (!content) {
+      return res.status(400).json({ message: 'Comment content is required' });
     }
 
-    const result = await db.query(
-      `INSERT INTO comments (content, post_id, user_id, is_anonymous)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, content, is_anonymous, created_at`,
-      [content, postId, req.user.id, isAnonymous]
-    );
+    const comment = await createComment({
+      user_id: req.user.id,
+      report_id: reportId,
+      content,
+      is_anonymous: isAnonymous,
+      parent_comment_id: parent_comment_id || null
+    });
 
-    res.status(201).json(result.rows[0]);
+    res.status(201).json(comment);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Failed to create comment' });
   }
 };
 
-module.exports ={createComment};
+const getReportComments = async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    const comments = await getCommentsByReportId(reportId);
+    res.json(comments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch comments' });
+  }
+};
+
+
+// Delete a comment by id (only by owner)
+const deleteReportComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const deleted = await deleteComment(commentId, req.user.id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Comment not found or not authorized' });
+    }
+    res.json({ message: 'Comment deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to delete comment' });
+  }
+};
+
+module.exports = {
+  createReportComment,
+  getReportComments,
+  deleteReportComment
+};
