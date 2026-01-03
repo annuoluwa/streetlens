@@ -1,6 +1,6 @@
 const pool = require('../db/db');
 
-// Create a new report
+
 
 const createReport = async ({
   user_id,
@@ -13,7 +13,8 @@ const createReport = async ({
   landlord_or_agency,
   advert_source,
   category,
-  is_anonymous
+  is_anonymous,
+  is_flagged = false
 }) => {
   const result = await pool.query(
     `
@@ -28,9 +29,10 @@ const createReport = async ({
       landlord_or_agency,
       advert_source,
       category,
-      is_anonymous
+      is_anonymous,
+      is_flagged
     )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
     RETURNING
       id,
       title,
@@ -38,6 +40,7 @@ const createReport = async ({
       city,
       category,
       is_anonymous,
+      is_flagged,
       created_at
     `,
     [
@@ -51,7 +54,8 @@ const createReport = async ({
       landlord_or_agency,
       advert_source,
       category,
-      is_anonymous
+      is_anonymous,
+      is_flagged
     ]
   );
 
@@ -78,7 +82,7 @@ const getAllReports = async () => {
   return result.rows;
 };
 
-// Get report by ID
+
 const getReportById = async (reportId) => {
   const result = await pool.query(
     `
@@ -94,6 +98,7 @@ const getReportById = async (reportId) => {
       r.advert_source,
       r.category,
       r.is_anonymous,
+      r.is_flagged,
       r.created_at
     FROM reports r
     WHERE r.id = $1
@@ -104,11 +109,13 @@ const getReportById = async (reportId) => {
   return result.rows[0];
 };
 
-// Advanced filtering function
+
 const getFilteredReports = async ({ search, city, category, limit = 10, offset = 0 }) => {
   let baseQuery = `
-    SELECT *
-    FROM reports
+    SELECT r.*, (
+      SELECT file_name FROM evidence_files ef WHERE ef.report_id = r.id ORDER BY ef.id ASC LIMIT 1
+    ) AS evidence
+    FROM reports r
     WHERE 1=1
   `;
   const values = [];

@@ -18,7 +18,7 @@ const createComment = async ({
   return result.rows[0];
 };
 
-// Recursive helper: build tree from flat array
+
 const buildCommentTree = (comments) => {
   const map = {};
   const roots = [];
@@ -60,7 +60,7 @@ const getCommentsByReportId = async (report_id) => {
   return buildCommentTree(result.rows);
 };
 
-// Delete a comment by id and user id (for ownership)
+
 const deleteComment = async (comment_id, user_id) => {
   const result = await pool.query(
     `DELETE FROM comments WHERE id = $1 AND user_id = $2 RETURNING *`,
