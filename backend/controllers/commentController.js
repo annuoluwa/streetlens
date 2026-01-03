@@ -40,7 +40,7 @@ const getReportComments = async (req, res) => {
 };
 
 
-// Delete a comment by id (only by owner)
+
 const deleteReportComment = async (req, res) => {
   try {
     const { commentId } = req.params;
