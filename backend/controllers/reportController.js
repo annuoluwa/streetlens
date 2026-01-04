@@ -1,9 +1,44 @@
 const pool = require('../db/db');
 const reportModel = require('../models/reportModel');
 
+// Delete a report (user can only delete their own, or admin)
+const deleteReport = async (req, res) => {
+  try {
+    // Require authentication
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    const { id } = req.params;
+    // Get the report to check ownership
+    const reportRes = await pool.query('SELECT user_id FROM reports WHERE id = $1', [id]);
+    if (reportRes.rows.length === 0) {
+      return res.status(404).json({ message: 'Report not found' });
+    }
+    const reportOwnerId = reportRes.rows[0].user_id;
+    // Only allow if user is owner or admin
+    const isAdmin = req.user && req.user.role === 'admin';
+    if (reportOwnerId !== req.user.id && !isAdmin) {
+      return res.status(403).json({ message: 'You do not have permission to delete this report' });
+    }
+    // Delete evidence files first (if any)
+    await pool.query('DELETE FROM evidence_files WHERE report_id = $1', [id]);
+    // Delete the report
+    await pool.query('DELETE FROM reports WHERE id = $1', [id]);
+    res.status(200).json({ message: 'Report deleted successfully' });
+  } catch (error) {
+    console.error('Error in deleteReport:', error);
+    res.status(500).json({ message: 'Failed to delete report', error: error.message });
+  }
+};
+
+
 
 const createReport = async (req, res) => {
   try {
+    // Require authentication
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Authentication required to submit a report' });
+    }
     // Multer parses form fields as strings, so convert as needed
     const {
       title,
@@ -14,6 +49,7 @@ const createReport = async (req, res) => {
       property_type,
       landlord_or_agency,
       advert_source,
+          flat_number,
       category,
       is_anonymous,
       flagged,
@@ -22,8 +58,8 @@ const createReport = async (req, res) => {
     // Multiple files (multer array)
     const evidenceFiles = req.files;
 
-    if (!title || !description) {
-      return res.status(400).json({ message: 'Title and description are required' });
+    if (!title || !description || !street) {
+      return res.status(400).json({ message: 'Title, description, and street are required' });
     }
 
     // Debug: log incoming data and user
@@ -35,6 +71,7 @@ const createReport = async (req, res) => {
       postcode,
       street,
       property_type,
+      flat_number,
       landlord_or_agency,
       advert_source,
       category,
@@ -45,8 +82,8 @@ const createReport = async (req, res) => {
     // Insert report 
     const result = await pool.query(
       `INSERT INTO reports 
-        (user_id, title, description, city, postcode, street, property_type, landlord_or_agency, advert_source, category, is_anonymous, is_flagged)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        (user_id, title, description, city, postcode, street, flat_number, property_type, landlord_or_agency, advert_source, category, is_anonymous, is_flagged)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
        RETURNING *`,
       [
         req.user && req.user.id,
@@ -55,6 +92,7 @@ const createReport = async (req, res) => {
         city || null,
         postcode || null,
         street || null,
+        flat_number || null,
         property_type || null,
         landlord_or_agency || null,
         advert_source || null,
@@ -155,4 +193,5 @@ module.exports = {
   createReport,
   getReports,
   getReportById,
+  deleteReport,
 };

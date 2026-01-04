@@ -1,14 +1,37 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import api from '../utils/api';
+import { deleteReport as deleteReportApi } from '../utils/deleteReport';
 import styles from './ReportDetailsPage.module.css';
 
 const ReportDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const user = useSelector(state => state.user.user);
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  // Only allow delete if user is the report owner
+  // Fallback: if report.user_id is missing, allow delete if user.id === report.id (for debugging)
+  const canDelete = user && report && (report.user_id ? user.id === report.user_id : user.id === report.id);
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this report? This cannot be undone.')) return;
+    setDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      await deleteReportApi(id);
+      navigate('/'); // Redirect to home or reports list
+    } catch (err) {
+      setDeleteError(err?.response?.data?.message || 'Failed to delete report');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
 
 
@@ -130,22 +153,33 @@ const ReportDetailsPage = () => {
 
   return (
     <div className={styles.container}>
-      {report.is_flagged && (
-        <span className={styles.flaggedNegative} title="Flagged as negative/sensitive">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-            <polygon points="20,5 37,35 3,35" fill="#e74c3c" />
-            <rect x="19" y="15" width="2" height="10" rx="1" fill="#fff" />
-            <rect x="19" y="27" width="2" height="2" rx="1" fill="#fff" />
-          </svg>
-        </span>
-      )}
-      <div className={styles.headerSection}>
+      <div className={styles.headerSection} style={{ position: 'relative', minHeight: 48 }}>
+        {report.is_flagged && (
+          <span className={styles.flaggedNegative} title="Flagged as negative/sensitive">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <polygon points="20,5 37,35 3,35" fill="#e74c3c" />
+              <rect x="19" y="15" width="2" height="10" rx="1" fill="#fff" />
+              <rect x="19" y="27" width="2" height="2" rx="1" fill="#fff" />
+            </svg>
+          </span>
+        )}
+        {canDelete && (
+          <button
+            className={styles.deleteBtn}
+            onClick={handleDelete}
+            disabled={deleteLoading}
+            style={{ position: 'absolute', top: 8, right: 8, zIndex: 110 }}
+          >
+            {deleteLoading ? 'Deleting...' : 'Delete Report'}
+          </button>
+        )}
         <h2 className={styles.title}>{report.title}</h2>
         <div className={styles.meta}>
           <span><strong>Location:</strong> {report.city || report.location}</span>
-          <span><strong>Date:</strong> {report.createdAt ? new Date(report.createdAt).toLocaleString() : 'N/A'}</span>
+          <span><strong>Date:</strong> {report.created_at ? new Date(report.created_at).toLocaleString() : 'N/A'}</span>
         </div>
       </div>
+      {deleteError && <div style={{ color: 'red', marginBottom: 8 }}>{deleteError}</div>}
       {images.length > 0 && (
         <div className={styles.sliderWrapper}>
           <button className={styles.sliderBtn} onClick={handlePrev}>&lt;</button>

@@ -11,6 +11,7 @@ const createReport = async ({
   street,
   property_type,
   landlord_or_agency,
+      flat_number,
   advert_source,
   category,
   is_anonymous,
@@ -26,6 +27,7 @@ const createReport = async ({
       postcode,
       street,
       property_type,
+      flat_number,
       landlord_or_agency,
       advert_source,
       category,
@@ -38,6 +40,7 @@ const createReport = async ({
       title,
       description,
       city,
+      flat_number,
       category,
       is_anonymous,
       is_flagged,
@@ -54,6 +57,7 @@ const createReport = async ({
       landlord_or_agency,
       advert_source,
       category,
+      r.flat_number,
       is_anonymous,
       is_flagged
     ]
@@ -88,6 +92,7 @@ const getReportById = async (reportId) => {
     `
     SELECT
       r.id,
+      r.user_id,
       r.title,
       r.description,
       r.city,

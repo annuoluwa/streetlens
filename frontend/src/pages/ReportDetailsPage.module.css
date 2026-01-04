@@ -1,3 +1,24 @@
+/* Delete Button Styling */
+.deleteBtn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 0.45em 1.1em;
+  font-size: 0.98em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+  transition: background 0.2s, box-shadow 0.2s;
+  margin: 0;
+}
+.deleteBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.deleteBtn:hover:not(:disabled) {
+  background: #c0392b;
+}
 /* --- Comments Section Styling --- */
 .commentsSection {
   margin-top: 2.5rem;
