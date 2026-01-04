@@ -50,7 +50,13 @@ const HomeFeed = () => {
 							<div className={styles.reportDescription}>{report.description}</div>
 							<div className={styles.reportMeta}>
 								<span><strong>Location:</strong> {report.city || report.location}</span>
-								<span><strong>Date:</strong> {report.createdAt ? new Date(report.createdAt).toLocaleString() : 'N/A'}</span>
+								<span><strong>Date:</strong> {
+									report.created_at
+										? new Date(report.created_at).toLocaleString()
+										: report.createdAt
+											? new Date(report.createdAt).toLocaleString()
+											: 'N/A'
+								}</span>
 							</div>
 						</div>
 					);
