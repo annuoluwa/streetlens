@@ -4,10 +4,10 @@ import axios from 'axios';
 const URL = `${process.env.REACT_APP_API_URL}/api/auth`;
 // Initial state
 const initialState = {
-	user: null,
-	token: null,
-	loading: false,
-	error: null,
+  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
+  token: localStorage.getItem('token') || null,
+  loading: false,
+  error: null,
 };
 
 // Async thunk for login
