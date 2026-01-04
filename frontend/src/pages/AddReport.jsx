@@ -13,6 +13,7 @@ const AddReport = () => {
 	const [city, setCity] = useState('');
 	const [postcode, setPostcode] = useState('');
 	const [street, setStreet] = useState('');
+	const [flatNumber, setFlatNumber] = useState('');
 	const [propertyType, setPropertyType] = useState('');
 	const [landlordOrAgency, setLandlordOrAgency] = useState('');
 	const [advertSource, setAdvertSource] = useState('');
@@ -54,6 +55,10 @@ const AddReport = () => {
 			setCityError('City is required.');
 			valid = false;
 		}
+		if (!flatNumber.trim()) {
+			alert('Flat/Unit Number is required.');
+			valid = false;
+		}
 		if (!files.length) {
 			setFileError('Evidence file is required.');
 			valid = false;
@@ -63,6 +68,7 @@ const AddReport = () => {
 		formData.append('title', title);
 		formData.append('description', description);
 		formData.append('city', city);
+		formData.append('flat_number', flatNumber);
 		formData.append('postcode', postcode);
 		formData.append('street', street);
 		formData.append('property_type', propertyType);
@@ -79,6 +85,7 @@ const AddReport = () => {
 			setCity('');
 			setPostcode('');
 			setStreet('');
+			setFlatNumber('');
 			setPropertyType('');
 			setLandlordOrAgency('');
 			setAdvertSource('');
@@ -162,6 +169,17 @@ const AddReport = () => {
 						value={postcode}
 						onChange={(e) => setPostcode(e.target.value)}
 						placeholder="e.g. SW1A 1AA"
+					/>
+				</div>
+				<div className={styles.formGroup}>
+					<label className={styles.label}>Flat/Unit Number <span style={{ color: '#e74c3c' }}>*</span>:</label>
+					<input
+						className={styles.input}
+						type="text"
+						value={flatNumber}
+						onChange={(e) => setFlatNumber(e.target.value)}
+						required
+						placeholder="e.g. Flat 2A, Unit 5"
 					/>
 				</div>
 				<div className={styles.formGroup}>
