@@ -24,7 +24,7 @@ const HomeFeed = () => {
 			<div className={styles.reportGrid}>
 				{reportList.map((report) => {
 					// Assume evidence filename is stored as report.evidence or similar
-					// If not, adjust this logic to match your backend response
+					// If not, adjust logic to match backend response
 					const imageUrl = report.evidence
 						? `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/uploads/${report.evidence}`
 						: null;

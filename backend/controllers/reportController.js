@@ -1,35 +1,7 @@
 const pool = require('../db/db');
 const reportModel = require('../models/reportModel');
 
-// Delete a report (user can only delete their own, or admin)
-const deleteReport = async (req, res) => {
-  try {
-    // Require authentication
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-    const { id } = req.params;
-    // Get the report to check ownership
-    const reportRes = await pool.query('SELECT user_id FROM reports WHERE id = $1', [id]);
-    if (reportRes.rows.length === 0) {
-      return res.status(404).json({ message: 'Report not found' });
-    }
-    const reportOwnerId = reportRes.rows[0].user_id;
-    // Only allow if user is owner or admin
-    const isAdmin = req.user && req.user.role === 'admin';
-    if (reportOwnerId !== req.user.id && !isAdmin) {
-      return res.status(403).json({ message: 'You do not have permission to delete this report' });
-    }
-    // Delete evidence files first (if any)
-    await pool.query('DELETE FROM evidence_files WHERE report_id = $1', [id]);
-    // Delete the report
-    await pool.query('DELETE FROM reports WHERE id = $1', [id]);
-    res.status(200).json({ message: 'Report deleted successfully' });
-  } catch (error) {
-    console.error('Error in deleteReport:', error);
-    res.status(500).json({ message: 'Failed to delete report', error: error.message });
-  }
-};
+
 
 
 
@@ -113,6 +85,38 @@ const createReport = async (req, res) => {
         );
       }
     }
+
+
+    // Delete a report (user can only delete their own, or admin)
+const deleteReport = async (req, res) => {
+  try {
+    // Require authentication
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    const { id } = req.params;
+    // Get the report to check ownership
+    const reportRes = await pool.query('SELECT user_id FROM reports WHERE id = $1', [id]);
+    if (reportRes.rows.length === 0) {
+      return res.status(404).json({ message: 'Report not found' });
+    }
+    const reportOwnerId = reportRes.rows[0].user_id;
+    // Only allow if user is owner or admin
+    const isAdmin = req.user && req.user.role === 'admin';
+    if (reportOwnerId !== req.user.id && !isAdmin) {
+      return res.status(403).json({ message: 'Permission denied: insufficient privileges to delete this report.' });
+    }
+    // Delete evidence files first (if any)
+    await pool.query('DELETE FROM evidence_files WHERE report_id = $1', [id]);
+    // Delete the report
+    await pool.query('DELETE FROM reports WHERE id = $1', [id]);
+    res.status(200).json({ message: 'Report deleted successfully' });
+  } catch (error) {
+    console.error('Error in deleteReport:', error);
+    res.status(500).json({ message: 'Failed to delete report', error: error.message });
+  }
+};
+
 
     // Threshold logic: count recent reports for this property
     const { countRecentReports, flagRecentReports } = require('../models/reportModel');

@@ -32,8 +32,8 @@ const registerUser = async (username, email, password) => {
         throw new Error('User already exists');
     }
 
-    // Here you would hash the password, for now, we will skip this step
-    const hashedPassword = password; // TODO: Replace this with actual hashing
+    // Password should be hashed before calling this function.
+    const hashedPassword = password;
 
     // Create the new user
     const newUser = await createUser(username, email, hashedPassword);

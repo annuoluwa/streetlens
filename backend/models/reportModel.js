@@ -1,23 +1,4 @@
-// Count reports for a given (postcode, street, flat_number) in the last 30 days
-const countRecentReports = async ({ postcode, street, flat_number }) => {
-  const result = await pool.query(
-    `SELECT COUNT(*) FROM reports
-     WHERE postcode = $1 AND street = $2 AND flat_number = $3
-       AND created_at >= NOW() - INTERVAL '30 days'`,
-    [postcode, street, flat_number]
-  );
-  return parseInt(result.rows[0].count, 10);
-};
 
-// Flag all reports for a given (postcode, street, flat_number) in the last 30 days (admin/system flag)
-const flagRecentReports = async ({ postcode, street, flat_number }) => {
-  await pool.query(
-    `UPDATE reports SET admin_flagged = true
-     WHERE postcode = $1 AND street = $2 AND flat_number = $3
-       AND created_at >= NOW() - INTERVAL '30 days'`,
-    [postcode, street, flat_number]
-  );
-};
 const pool = require('../db/db');
 
 
@@ -182,11 +163,32 @@ const getFilteredReports = async ({ search, city, category, admin_flagged, limit
 };
 
 
+// Count reports for a given (postcode, street, flat_number) in the last 30 days
+const countRecentReports = async ({ postcode, street, flat_number }) => {
+  const result = await pool.query(
+    `SELECT COUNT(*) FROM reports
+     WHERE postcode = $1 AND street = $2 AND flat_number = $3
+       AND created_at >= NOW() - INTERVAL '30 days'`,
+    [postcode, street, flat_number]
+  );
+  return parseInt(result.rows[0].count, 10);
+};
+
+// Flag all reports for a given (postcode, street, flat_number) in the last 30 days (admin/system flag)
+const flagRecentReports = async ({ postcode, street, flat_number }) => {
+  await pool.query(
+    `UPDATE reports SET admin_flagged = true
+     WHERE postcode = $1 AND street = $2 AND flat_number = $3
+       AND created_at >= NOW() - INTERVAL '30 days'`,
+    [postcode, street, flat_number]
+  );
+};
+
 module.exports = {
   createReport,
   getAllReports,
   getReportById,
-  getFilteredReports
-  ,countRecentReports
-  ,flagRecentReports
+  getFilteredReports,
+  countRecentReports,
+  flagRecentReports
 };
