@@ -114,6 +114,35 @@ const createReport = async (req, res) => {
       }
     }
 
+    // Threshold logic: count recent reports for this property
+    const { countRecentReports, flagRecentReports } = require('../models/reportModel');
+    const count = await countRecentReports({
+      postcode: report.postcode,
+      street: report.street,
+      flat_number: report.flat_number
+    });
+    const THRESHOLD = 3;
+
+    if (count >= THRESHOLD) {
+      await flagRecentReports({
+        postcode: report.postcode,
+        street: report.street,
+        flat_number: report.flat_number
+      });
+      // Send email notification to admin
+      const { sendAdminFlaggedNotification } = require('../utils/adminNotify');
+      try {
+        await sendAdminFlaggedNotification({
+          postcode: report.postcode,
+          street: report.street,
+          flat_number: report.flat_number,
+          count
+        });
+      } catch (notifyErr) {
+        console.error('Failed to send admin notification:', notifyErr);
+      }
+    }
+
     res.status(201).json(report);
   } catch (error) {
     console.error('Error in createReport:', error);
@@ -124,13 +153,20 @@ const createReport = async (req, res) => {
 
 const getReports = async (req, res) => {
   try {
-    const { search, city, category } = req.query;
+    const { search, city, category, admin_flagged } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
+    // Parse admin_flagged to boolean if present
+    let adminFlaggedValue = undefined;
+    if (typeof admin_flagged !== 'undefined') {
+      if (admin_flagged === 'true' || admin_flagged === true) adminFlaggedValue = true;
+      else if (admin_flagged === 'false' || admin_flagged === false) adminFlaggedValue = false;
+    }
+
     // Get filtered reports
-    const reports = await reportModel.getFilteredReports({ search, city, category, limit, offset });
+    const reports = await reportModel.getFilteredReports({ search, city, category, admin_flagged: adminFlaggedValue, limit, offset });
 
     // Get total count for pagination (with filters)
     let countQuery = 'SELECT COUNT(*) FROM reports WHERE 1=1';
@@ -149,6 +185,11 @@ const getReports = async (req, res) => {
     if (category) {
       countQuery += ` AND category ILIKE $${count}`;
       values.push(`%${category}%`);
+      count++;
+    }
+    if (typeof adminFlaggedValue !== 'undefined') {
+      countQuery += ` AND admin_flagged = $${count}`;
+      values.push(adminFlaggedValue);
       count++;
     }
     const { rows } = await pool.query(countQuery, values);

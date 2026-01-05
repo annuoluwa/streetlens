@@ -1,3 +1,23 @@
+// Count reports for a given (postcode, street, flat_number) in the last 30 days
+const countRecentReports = async ({ postcode, street, flat_number }) => {
+  const result = await pool.query(
+    `SELECT COUNT(*) FROM reports
+     WHERE postcode = $1 AND street = $2 AND flat_number = $3
+       AND created_at >= NOW() - INTERVAL '30 days'`,
+    [postcode, street, flat_number]
+  );
+  return parseInt(result.rows[0].count, 10);
+};
+
+// Flag all reports for a given (postcode, street, flat_number) in the last 30 days (admin/system flag)
+const flagRecentReports = async ({ postcode, street, flat_number }) => {
+  await pool.query(
+    `UPDATE reports SET admin_flagged = true
+     WHERE postcode = $1 AND street = $2 AND flat_number = $3
+       AND created_at >= NOW() - INTERVAL '30 days'`,
+    [postcode, street, flat_number]
+  );
+};
 const pool = require('../db/db');
 
 
@@ -11,11 +31,12 @@ const createReport = async ({
   street,
   property_type,
   landlord_or_agency,
-      flat_number,
+  flat_number,
   advert_source,
   category,
   is_anonymous,
-  is_flagged = false
+  is_flagged = false,
+  admin_flagged = false
 }) => {
   const result = await pool.query(
     `
@@ -32,9 +53,10 @@ const createReport = async ({
       advert_source,
       category,
       is_anonymous,
-      is_flagged
+      is_flagged,
+      admin_flagged
     )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
     RETURNING
       id,
       title,
@@ -44,6 +66,7 @@ const createReport = async ({
       category,
       is_anonymous,
       is_flagged,
+      admin_flagged,
       created_at
     `,
     [
@@ -57,9 +80,10 @@ const createReport = async ({
       landlord_or_agency,
       advert_source,
       category,
-      r.flat_number,
+      flat_number,
       is_anonymous,
-      is_flagged
+      is_flagged,
+      admin_flagged
     ]
   );
 
@@ -115,7 +139,7 @@ const getReportById = async (reportId) => {
 };
 
 
-const getFilteredReports = async ({ search, city, category, limit = 10, offset = 0 }) => {
+const getFilteredReports = async ({ search, city, category, admin_flagged, limit = 10, offset = 0 }) => {
   let baseQuery = `
     SELECT r.*, (
       SELECT file_name FROM evidence_files ef WHERE ef.report_id = r.id ORDER BY ef.id ASC LIMIT 1
@@ -144,6 +168,12 @@ const getFilteredReports = async ({ search, city, category, limit = 10, offset =
     count++;
   }
 
+  if (typeof admin_flagged !== 'undefined') {
+    baseQuery += ` AND admin_flagged = $${count}`;
+    values.push(admin_flagged);
+    count++;
+  }
+
   baseQuery += ` ORDER BY created_at DESC LIMIT $${count} OFFSET $${count + 1}`;
   values.push(limit, offset);
 
@@ -157,4 +187,6 @@ module.exports = {
   getAllReports,
   getReportById,
   getFilteredReports
+  ,countRecentReports
+  ,flagRecentReports
 };

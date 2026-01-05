@@ -153,9 +153,9 @@ const ReportDetailsPage = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.headerSection} style={{ position: 'relative', minHeight: 48 }}>
+      <div style={{ position: 'relative' }}>
         {report.is_flagged && (
-          <span className={styles.flaggedNegative} title="Flagged as negative/sensitive">
+          <span className={styles.flaggedNegative} title="Flagged as negative/sensitive" style={{ position: 'absolute', top: 0, right: 0, margin: 0 }}>
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
               <polygon points="20,5 37,35 3,35" fill="#e74c3c" />
               <rect x="19" y="15" width="2" height="10" rx="1" fill="#fff" />
@@ -163,22 +163,26 @@ const ReportDetailsPage = () => {
             </svg>
           </span>
         )}
-        {canDelete && (
-          <button
-            className={styles.deleteBtn}
-            onClick={handleDelete}
-            disabled={deleteLoading}
-            style={{ position: 'absolute', top: 8, right: 8, zIndex: 110 }}
-          >
-            {deleteLoading ? 'Deleting...' : 'Delete Report'}
-          </button>
-        )}
+      </div>
+      <div className={styles.headerSection} style={{ position: 'relative', minHeight: 48 }}>
         <h2 className={styles.title}>{report.title}</h2>
         <div className={styles.meta}>
           <span><strong>Location:</strong> {report.city || report.location}</span>
           <span><strong>Date:</strong> {report.created_at ? new Date(report.created_at).toLocaleString() : 'N/A'}</span>
         </div>
       </div>
+      {canDelete && (
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', margin: '0 0 8px 0' }}>
+          <button
+            className={styles.deleteBtn}
+            onClick={handleDelete}
+            disabled={deleteLoading}
+            style={{ position: 'static', margin: 0 }}
+          >
+            {deleteLoading ? 'Deleting...' : 'Delete'}
+          </button>
+        </div>
+      )}
       {deleteError && <div style={{ color: 'red', marginBottom: 8 }}>{deleteError}</div>}
       {images.length > 0 && (
         <div className={styles.sliderWrapper}>
