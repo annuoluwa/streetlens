@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../user/userSlice';
 import { Link, useNavigate } from 'react-router-dom';
+import styles from './Register.module.css';
 
 const Register = () => {
 	const dispatch = useDispatch();
@@ -31,7 +32,7 @@ const Register = () => {
 	};
 
 	return (
-		<div className="register-container">
+		<div className={styles['register-container']}>
 			<h2>Register</h2>
 			<form onSubmit={handleSubmit}>
 				<div>
@@ -101,7 +102,7 @@ const Register = () => {
 				{error && <div className="error">{error}</div>}
 				{success && <div className="success">Registration successful! Redirecting to login...</div>}
 			</form>
-			<div className="login-link" style={{ marginTop: '1rem' }}>
+			   <div className={styles['login-link']}>
 				Have an account?{' '}
 				<Link to="/login">Log in here</Link>
 			</div>

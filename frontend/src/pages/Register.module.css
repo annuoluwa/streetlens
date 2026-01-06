@@ -1,0 +1,107 @@
+.register-container {
+  max-width: 400px;
+  margin: 2.5rem auto;
+  padding: 2.5rem 2rem 2rem 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.register-container h2 {
+  margin-bottom: 1.5rem;
+  color: #222;
+  font-weight: 600;
+}
+
+.register-container form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.register-container label {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+
+.register-container input[type="text"],
+.register-container input[type="email"],
+.register-container input[type="password"],
+.register-container input[type="password"],
+.register-container input[type="text"] {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #f9fafb;
+  transition: border 0.2s;
+}
+
+.register-container input:focus {
+  border: 1.5px solid #4f8cff;
+  outline: none;
+  background: #fff;
+}
+
+.register-container button[type="submit"] {
+  margin-top: 0.5rem;
+  padding: 0.8rem 0;
+  width: 100%;
+  background: linear-gradient(90deg, #4f8cff 0%, #38b6ff 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(80,140,255,0.08);
+  transition: background 0.2s;
+}
+
+.register-container button[type="submit"]:hover:not(:disabled) {
+  background: linear-gradient(90deg, #38b6ff 0%, #4f8cff 100%);
+}
+
+.register-container .error {
+  color: #d32f2f;
+  background: #fff0f0;
+  border: 1px solid #ffd6d6;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.98rem;
+}
+
+.register-container .success {
+  color: #388e3c;
+  background: #e8f5e9;
+  border: 1px solid #b2dfdb;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.98rem;
+}
+
+.register-container .login-link {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+.register-container .login-link a {
+  color: #4f8cff;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 0.2rem;
+}
+
+.register-container .login-link a:hover {
+  text-decoration: underline;
+}
