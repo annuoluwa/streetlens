@@ -35,7 +35,7 @@ const Register = () => {
 		<div className={styles['register-container']}>
 			<h2>Register</h2>
 			<form onSubmit={handleSubmit}>
-				<div>
+				<div className={styles.inputRowRightPad}>
 					<label>Username:</label>
 					<input
 						type="text"
@@ -44,7 +44,7 @@ const Register = () => {
 						required
 					/>
 				</div>
-				<div>
+				<div className={styles.inputRowRightPad}>
 					<label>Email:</label>
 					<input
 						type="email"

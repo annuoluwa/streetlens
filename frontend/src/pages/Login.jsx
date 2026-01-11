@@ -22,7 +22,11 @@ const Login = () => {
     if (user) {
       setSuccess(true);
       setTimeout(() => {
-        navigate('/');
+        if (user.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
       }, 1500);
     }
   }, [user, navigate]);

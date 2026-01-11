@@ -8,6 +8,24 @@
 }
 
 .navbarLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+
+.logoImg {
+  height: 2.1rem;
+  width: 2.1rem;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(44,62,80,0.10);
+  padding: 2px;
+}
+
+
+.logoText {
   font-size: 1.5rem;
   font-weight: bold;
   color: #fff;
