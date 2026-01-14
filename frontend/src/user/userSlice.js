@@ -36,6 +36,24 @@ export const registerUser = createAsyncThunk(
 	}
 );
 
+// Async thunk for password reset
+export const resetPassword = createAsyncThunk(
+  'user/resetPassword',
+  async ({ oldPassword, newPassword }, { getState, rejectWithValue }) => {
+    try {
+      const { token } = getState().user;
+      const res = await axios.post(
+        `${URL}/reset-password`,
+        { oldPassword, newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Password reset failed');
+    }
+  }
+);
+
 // Slice
 const userSlice = createSlice({
 	name: 'user',
@@ -84,6 +102,19 @@ const userSlice = createSlice({
 				localStorage.setItem('token', action.payload.token);
 			})
 			.addCase(registerUser.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload;
+			})
+			// Reset Password
+			.addCase(resetPassword.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(resetPassword.fulfilled, (state, action) => {
+				state.loading = false;
+				state.error = null;
+			})
+			.addCase(resetPassword.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.payload;
 			});

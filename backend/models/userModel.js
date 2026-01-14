@@ -1,9 +1,9 @@
 const pool = require('../db/db');
 const jwt = require('jsonwebtoken');
 
-const createUser = async (username, email, hashedPassword) => {
-    const query = 'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email';
-    const values = [username, email, hashedPassword];
+const createUser = async (username, email, hashedPassword, role = 'user') => {
+    const query = 'INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role';
+    const values = [username, email, hashedPassword, role];
     const result = await pool.query(query, values);
     return result.rows[0];
 };
@@ -25,7 +25,7 @@ const findUserById = async (id) => {
     return result.rows[0];
 }
 
-const registerUser = async (username, email, password) => {
+const registerUser = async (username, email, password, role = 'user') => {
     // Check if the user already exists
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
@@ -36,11 +36,8 @@ const registerUser = async (username, email, password) => {
     const hashedPassword = password;
 
     // Create the new user
-    const newUser = await createUser(username, email, hashedPassword);
-
-    // Generate a JWT token for the new user
-    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
+    const newUser = await createUser(username, email, hashedPassword, role);
+    const token = jwt.sign({ id: newUser.id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
     return { user: newUser, token };
 };
 
@@ -50,10 +47,16 @@ const deleteUserById = async (id) => {
     return result.rows[0];
 };
 
+const updateUserPassword = async (id, hashedPassword) => {
+    const result = await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2 RETURNING id', [hashedPassword, id]);
+    return result.rows[0];
+};
+
 module.exports = {
     createUser,
     findUserByEmail,
     findUserById,
     registerUser,
-    deleteUserById
+    deleteUserById,
+    updateUserPassword
 };

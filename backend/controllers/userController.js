@@ -9,7 +9,7 @@ const deleteAccount = async (req, res) => {
     }
     res.json({ message: 'Account deleted' });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: 'Failed to delete account' });
   }
 };

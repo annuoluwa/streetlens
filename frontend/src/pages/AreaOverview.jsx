@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchReports } from '../report/reportSlice';
-import styles from './AreaOverview.module.css';
+
 
 
 const AreaOverview = () => {
@@ -18,7 +18,7 @@ const AreaOverview = () => {
 		dispatch(fetchReports());
 	}, [dispatch]);
 
-	// Use a static list of UK cities for the city filter
+	// A static list of UK cities for the city filter
 	const ukCities = [
 		'London', 'Birmingham', 'Manchester', 'Glasgow', 'Liverpool', 'Leeds', 'Sheffield', 'Edinburgh',
 		'Bristol', 'Cardiff', 'Belfast', 'Newcastle', 'Leicester', 'Coventry', 'Kingston upon Hull',
@@ -48,11 +48,13 @@ const AreaOverview = () => {
 		'Blaenavon', 'Ebbw Vale', 'Tredegar', 'Brynmawr', 'Abertillery', 'Crickhowell', 'Hay-on-Wye'
 	];
 	const cityOptions = ukCities;
-	const categoryOptions = useMemo(() => {
-		const set = new Set();
-		reports.forEach(r => { if (r.category) set.add(r.category); });
-		return Array.from(set).sort();
-	}, [reports]);
+	const categoryOptions = [
+		'Health Hazard',
+		'Security Hazard',
+		'Fire Hazard',
+		'Structural Hazard',
+		'Environmental Hazard'
+	];
 
 	// Filter and sort reports
 	const filteredReports = useMemo(() => {
@@ -68,59 +70,73 @@ const AreaOverview = () => {
 		return filtered;
 	}, [reports, city, category, flagged, sort]);
 
-	return (
-		<div className={styles.areaOverviewContainer}>
-			<h2 className={styles.areaOverviewHeader}>Area Overview</h2>
-			<div style={{ display: 'flex', gap: '1.5em', marginBottom: '1.5em', flexWrap: 'wrap' }}>
-				<div>
-					<label style={{ fontWeight: 500, marginRight: 8 }}>City:</label>
-					<select value={city} onChange={e => setCity(e.target.value)}>
-						<option value="">All</option>
-						{cityOptions.map(c => <option key={c} value={c}>{c}</option>)}
-					</select>
-				</div>
-				<div>
-					<label style={{ fontWeight: 500, marginRight: 8 }}>Category:</label>
-					<select value={category} onChange={e => setCategory(e.target.value)}>
-						<option value="">All</option>
-						{categoryOptions.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-					</select>
-				</div>
-				<div>
-					<label style={{ fontWeight: 500, marginRight: 8 }}>Flagged:</label>
-					<select value={flagged} onChange={e => setFlagged(e.target.value)}>
-						<option value="all">All</option>
-						<option value="flagged">Flagged</option>
-						<option value="not_flagged">Not Flagged</option>
-					</select>
-				</div>
-				<div>
-					<label style={{ fontWeight: 500, marginRight: 8 }}>Sort by:</label>
-					<select value={sort} onChange={e => setSort(e.target.value)}>
-						<option value="date-desc">Date (Newest)</option>
-						<option value="date-asc">Date (Oldest)</option>
-						<option value="title-az">Title (A-Z)</option>
-						<option value="title-za">Title (Z-A)</option>
-					</select>
-				</div>
-			</div>
-			{loading && <div>Loading reports...</div>}
-			{error && <div className={styles.error}>{error}</div>}
-			{!loading && !error && filteredReports.length === 0 && <div>No reports found for this area.</div>}
-			<ul className={styles.areaOverviewList}>
-				{filteredReports.map((report) => (
-					<li key={report.id || report._id} className={styles.areaOverviewItem}>
-						<div className={styles.areaOverviewTitle}>{report.title}</div>
-						<div className={styles.areaOverviewDesc}>{report.description}</div>
-						<div className={styles.areaOverviewMeta}>
-							<span><em>Location:</em> {report.city || report.location}</span>
-							<span><em>Date:</em> {report.createdAt ? new Date(report.createdAt).toLocaleString() : 'N/A'}</span>
+			return (
+				<div className="container my-4">
+					<h2 className="mb-4">Area Overview</h2>
+					<div className="row g-3 mb-4">
+						<div className="col-12 col-md-3">
+							<label className="form-label fw-semibold">City</label>
+							<select className="form-select" value={city} onChange={e => setCity(e.target.value)}>
+								<option value="">All</option>
+								{cityOptions.map((c, idx) => <option key={c + '-' + idx} value={c}>{c}</option>)}
+							</select>
 						</div>
-					</li>
-				))}
-			</ul>
-		</div>
-	);
+						<div className="col-12 col-md-3">
+							<label className="form-label fw-semibold">Category</label>
+							<select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
+								<option value="">All</option>
+								<option value="Health Hazard">Health Hazard</option>
+								<option value="Security Hazard">Security Hazard</option>
+								<option value="Fire Hazard">Fire Hazard</option>
+								<option value="Structural Hazard">Structural Hazard</option>
+								<option value="Environmental Hazard">Environmental Hazard</option>
+							</select>
+						</div>
+						<div className="col-12 col-md-3">
+							<label className="form-label fw-semibold">Flagged</label>
+							<select className="form-select" value={flagged} onChange={e => setFlagged(e.target.value)}>
+								<option value="all">All</option>
+								<option value="flagged">Flagged</option>
+								<option value="not_flagged">Not Flagged</option>
+							</select>
+						</div>
+						<div className="col-12 col-md-3">
+							<label className="form-label fw-semibold">Sort by</label>
+							<select className="form-select" value={sort} onChange={e => setSort(e.target.value)}>
+								<option value="date-desc">Date (Newest)</option>
+								<option value="date-asc">Date (Oldest)</option>
+								<option value="title-az">Title (A-Z)</option>
+								<option value="title-za">Title (Z-A)</option>
+							</select>
+						</div>
+					</div>
+					{loading && <div className="alert alert-info">Loading reports...</div>}
+					{error && <div className="alert alert-danger">{error}</div>}
+					{!loading && !error && filteredReports.length === 0 && (
+						<div className="alert alert-secondary">No reports found for this area.</div>
+					)}
+					<div className="row g-3">
+						{filteredReports.map((report) => (
+							<div className="col-12 col-md-6 col-lg-4" key={report.id || report._id}>
+								<div className="card h-100 shadow-sm">
+									<div className="card-body">
+										<h5 className="card-title">{report.title}</h5>
+										<p className="card-text">{report.description}</p>
+										<p className="card-text mb-1"><span className="fw-semibold">Location:</span> {report.city || report.location}</p>
+										<p className="card-text mb-1"><span className="fw-semibold">Date Posted:</span> {
+											report.createdAt
+												? new Date(report.createdAt).toLocaleString()
+												: report.created_at
+													? new Date(report.created_at).toLocaleString()
+													: 'N/A'
+										}</p>
+									</div>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			);
 };
 
 export default AreaOverview;

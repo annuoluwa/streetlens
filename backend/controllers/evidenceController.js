@@ -19,7 +19,7 @@ const saveEvidence = async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: 'Failed to upload evidence' });
   }
 };

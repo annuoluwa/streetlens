@@ -23,7 +23,7 @@ const createReportComment = async (req, res) => {
 
     res.status(201).json(comment);
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: 'Failed to create comment' });
   }
 };
@@ -34,7 +34,7 @@ const getReportComments = async (req, res) => {
     const comments = await getCommentsByReportId(reportId);
     res.json(comments);
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: 'Failed to fetch comments' });
   }
 };
@@ -50,7 +50,7 @@ const deleteReportComment = async (req, res) => {
     }
     res.json({ message: 'Comment deleted' });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: 'Failed to delete comment' });
   }
 };

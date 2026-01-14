@@ -1,3 +1,12 @@
+// Reset escalation threshold for an apartment by updating last_escalated_at
+const resetEscalationThreshold = async ({ postcode, street, flat_number }) => {
+  await pool.query(
+    `UPDATE reports SET last_escalated_at = NOW()
+     WHERE postcode = $1 AND street = $2 AND flat_number = $3
+       AND created_at >= NOW() - INTERVAL '30 days'`,
+    [postcode, street, flat_number]
+  );
+};
 
 const pool = require('../db/db');
 
@@ -184,11 +193,24 @@ const flagRecentReports = async ({ postcode, street, flat_number }) => {
   );
 };
 
+
+// Admin: verify (approve/reject) a flagged report
+const verifyReportStatus = async (id, status) => {
+  // Only update if currently flagged
+  const res = await pool.query(
+    `UPDATE reports SET admin_verified = $1, admin_flagged = false WHERE id = $2 AND admin_flagged = true RETURNING id`,
+    [status, id]
+  );
+  return res.rowCount > 0;
+};
+
 module.exports = {
   createReport,
   getAllReports,
   getReportById,
   getFilteredReports,
   countRecentReports,
-  flagRecentReports
+  flagRecentReports,
+  verifyReportStatus,
+  resetEscalationThreshold
 };

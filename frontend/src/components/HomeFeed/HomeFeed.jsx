@@ -10,26 +10,30 @@ const HomeFeed = () => {
 		dispatch(fetchReports());
 	}, [dispatch]);
 
-	return (
-		<div className="home-feed-container">
-			<h2>Latest Reports</h2>
-			{loading && <div>Loading reports...</div>}
-			{error && <div className="error">{error}</div>}
-			{!loading && !error && reports.length === 0 && <div>No reports available.</div>}
-			<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-				{reports.map((report) => (
-					<div key={report.id || report._id} style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, background: '#fafafa' }}>
-						<h3 style={{ margin: 0 }}>{report.title}</h3>
-						<p style={{ margin: '0.5rem 0' }}>{report.description}</p>
-						<div style={{ fontSize: 14, color: '#555' }}>
-							<span><strong>Location:</strong> {report.location}</span> |{' '}
-							<span><strong>Date:</strong> {report.createdAt ? new Date(report.createdAt).toLocaleString() : 'N/A'}</span>
+		return (
+			<div className="container my-4">
+				<h2 className="mb-4">Latest Reports</h2>
+				{loading && <div className="alert alert-info">Loading reports...</div>}
+				{error && <div className="alert alert-danger">{error}</div>}
+				{!loading && !error && reports.length === 0 && (
+					<div className="alert alert-secondary">No reports available.</div>
+				)}
+				<div className="row g-3">
+					{reports.map((report) => (
+						<div className="col-12 col-md-6 col-lg-4" key={report.id || report._id}>
+							<div className="card h-100 shadow-sm">
+								<div className="card-body">
+									<h5 className="card-title">{report.title}</h5>
+									<p className="card-text">{report.description}</p>
+									<p className="card-text mb-1"><span className="fw-semibold">Location:</span> {report.location}</p>
+									<p className="card-text"><span className="fw-semibold">Date:</span> {report.createdAt ? new Date(report.createdAt).toLocaleString() : 'N/A'}</p>
+								</div>
+							</div>
 						</div>
-					</div>
-				))}
+					))}
+				</div>
 			</div>
-		</div>
-	);
+		);
 };
 
 export default HomeFeed;

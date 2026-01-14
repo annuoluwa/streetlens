@@ -1,12 +1,38 @@
 require('dotenv').config();
+
 const express = require('express');
 const app = express();
 
+// Winston logger setup
+const winston = require('winston');
+const fs = require('fs');
+const logDir = 'logs';
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
+
+const transports = [];
+if (process.env.NODE_ENV === 'production') {
+  transports.push(
+    new winston.transports.File({ filename: `${logDir}/server.log`, level: 'info' })
+  );
+} else {
+  transports.push(new winston.transports.Console());
+}
+
+const logger = winston.createLogger({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(({ timestamp, level, message }) => {
+      return `[${timestamp}] ${level}: ${message}`;
+    })
+  ),
+  transports,
+});
+
 const path = require('path');
 const cors = require('cors');
-
-
-
 
 
 app.use(cors());
@@ -39,6 +65,10 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;

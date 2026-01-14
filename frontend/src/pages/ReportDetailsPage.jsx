@@ -74,9 +74,9 @@ const ReportDetailsPage = () => {
 
 
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
-  if (!report) return <div>No report found.</div>;
+  if (loading) return <div className="alert alert-info">Loading...</div>;
+  if (error) return <div className="alert alert-danger">{error}</div>;
+  if (!report) return <div className="alert alert-secondary">No report found.</div>;
 
   // Images: report.evidence_files (array of filenames)
   const images = Array.isArray(report.evidence_files) ? report.evidence_files : [];
@@ -152,69 +152,68 @@ const ReportDetailsPage = () => {
   );
 
   return (
-    <div className={styles.container}>
-      <div style={{ position: 'relative' }}>
-        {report.is_flagged && (
-          <span className={styles.flaggedNegative} title="Flagged as negative/sensitive" style={{ position: 'absolute', top: 0, right: 0, margin: 0 }}>
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <polygon points="20,5 37,35 3,35" fill="#e74c3c" />
-              <rect x="19" y="15" width="2" height="10" rx="1" fill="#fff" />
-              <rect x="19" y="27" width="2" height="2" rx="1" fill="#fff" />
-            </svg>
-          </span>
+    <div className="container my-4">
+      <div className="card shadow p-4 mb-4">
+        <div className="position-relative mb-3">
+          {report.is_flagged && (
+            <span className="position-absolute top-0 end-0 m-2" title="Flagged as negative/sensitive">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <polygon points="20,5 37,35 3,35" fill="#e74c3c" />
+                <rect x="19" y="15" width="2" height="10" rx="1" fill="#fff" />
+                <rect x="19" y="27" width="2" height="2" rx="1" fill="#fff" />
+              </svg>
+            </span>
+          )}
+          <h2 className="mb-2">{report.title}</h2>
+          <div className="d-flex flex-wrap gap-3 small text-muted mb-2">
+            <span><strong>Location:</strong> {report.city || report.location}</span>
+            <span><strong>Date:</strong> {report.created_at ? new Date(report.created_at).toLocaleString() : 'N/A'}</span>
+          </div>
+        </div>
+        {canDelete && (
+          <div className="d-flex justify-content-end mb-2">
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={handleDelete}
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
         )}
-      </div>
-      <div className={styles.headerSection} style={{ position: 'relative', minHeight: 48 }}>
-        <h2 className={styles.title}>{report.title}</h2>
-        <div className={styles.meta}>
-          <span><strong>Location:</strong> {report.city || report.location}</span>
-          <span><strong>Date:</strong> {report.created_at ? new Date(report.created_at).toLocaleString() : 'N/A'}</span>
+        {deleteError && <div className="alert alert-danger py-2 mb-2">{deleteError}</div>}
+        {images.length > 0 && (
+          <div className="d-flex align-items-center justify-content-center mb-3 gap-2">
+            <button className="btn btn-outline-secondary btn-sm" onClick={handlePrev}>&lt;</button>
+            <img
+              className="rounded border"
+              style={{ maxHeight: 260, maxWidth: '100%' }}
+              src={`${imageBaseUrl}/uploads/${images[currentImage]}`}
+              alt={`Evidence ${currentImage + 1}`}
+            />
+            <button className="btn btn-outline-secondary btn-sm" onClick={handleNext}>&gt;</button>
+            <div className="ms-2 small text-muted">{currentImage + 1} / {images.length}</div>
+          </div>
+        )}
+        <div className="mb-3">{report.description}</div>
+        <div className="row g-2 mb-3">
+          <div className="col-6 col-md-4"><strong>Postcode:</strong> {report.postcode || 'N/A'}</div>
+          <div className="col-6 col-md-4"><strong>Street:</strong> {report.street || 'N/A'}</div>
+          <div className="col-6 col-md-4"><strong>Property Type:</strong> {report.property_type || 'N/A'}</div>
+          <div className="col-6 col-md-4"><strong>Landlord/Agency:</strong> {report.landlord_or_agency || 'N/A'}</div>
+          <div className="col-6 col-md-4"><strong>Advert Source:</strong> {report.advert_source || 'N/A'}</div>
+          <div className="col-6 col-md-4"><strong>Category:</strong> {report.category || 'N/A'}</div>
+          <div className="col-6 col-md-4"><strong>Anonymous:</strong> {report.is_anonymous ? 'Yes' : 'No'}</div>
         </div>
       </div>
-      {canDelete && (
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', margin: '0 0 8px 0' }}>
-          <button
-            className={styles.deleteBtn}
-            onClick={handleDelete}
-            disabled={deleteLoading}
-            style={{ position: 'static', margin: 0 }}
-          >
-            {deleteLoading ? 'Deleting...' : 'Delete'}
-          </button>
-        </div>
-      )}
-      {deleteError && <div style={{ color: 'red', marginBottom: 8 }}>{deleteError}</div>}
-      {images.length > 0 && (
-        <div className={styles.sliderWrapper}>
-          <button className={styles.sliderBtn} onClick={handlePrev}>&lt;</button>
-          <img
-            className={styles.sliderImg}
-            src={`${imageBaseUrl}/uploads/${images[currentImage]}`}
-            alt={`Evidence ${currentImage + 1}`}
-          />
-          <button className={styles.sliderBtn} onClick={handleNext}>&gt;</button>
-          <div className={styles.sliderIndicator}>{currentImage + 1} / {images.length}</div>
-        </div>
-      )}
-      <div className={styles.description}>{report.description}</div>
-      <div className={styles.detailsGrid}>
-        <div><strong>Postcode:</strong> {report.postcode || 'N/A'}</div>
-        <div><strong>Street:</strong> {report.street || 'N/A'}</div>
-        <div><strong>Property Type:</strong> {report.property_type || 'N/A'}</div>
-        <div><strong>Landlord/Agency:</strong> {report.landlord_or_agency || 'N/A'}</div>
-        <div><strong>Advert Source:</strong> {report.advert_source || 'N/A'}</div>
-        <div><strong>Category:</strong> {report.category || 'N/A'}</div>
-        <div><strong>Anonymous:</strong> {report.is_anonymous ? 'Yes' : 'No'}</div>
-      </div>
-
       {/* Comments Section */}
-      <div className={styles.commentsSection}>
-        <h3 className={styles.commentsHeader}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Comments <span style={{fontWeight:400, color:'#2980b9', marginLeft:4, fontSize:'1em'}}>({comments.length})</span>
+      <div className="card shadow p-4">
+        <h3 className="mb-3 d-flex align-items-center gap-2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{height: '1.5em'}}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Comments <span className="fw-normal text-primary">({comments.length})</span>
         </h3>
         <form
-          className={styles.commentForm}
+          className="mb-3"
           onSubmit={async e => {
             e.preventDefault();
             if (!newComment.trim()) return;
@@ -232,23 +231,27 @@ const ReportDetailsPage = () => {
           }}
         >
           <textarea
-            className={styles.commentInput}
+            className="form-control mb-2"
             placeholder="Write a comment..."
             rows={3}
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
           />
-          <label className={styles.anonCheckboxLabel}>
+          <div className="form-check mb-2">
             <input
+              className="form-check-input"
               type="checkbox"
               checked={isAnonymous}
               onChange={e => setIsAnonymous(e.target.checked)}
+              id="anonCheck"
             />
-            Post as Anonymous
-          </label>
-          <button type="submit" className={styles.commentSubmitBtn}>Post Comment</button>
+            <label className="form-check-label" htmlFor="anonCheck">
+              Post as Anonymous
+            </label>
+          </div>
+          <button type="submit" className="btn btn-primary btn-sm">Post Comment</button>
         </form>
-        <div className={styles.commentsList}>
+        <div>
           {renderComments(comments)}
         </div>
       </div>

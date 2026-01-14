@@ -10,24 +10,30 @@ const AreaOverview = () => {
 		dispatch(fetchReports());
 	}, [dispatch]);
 
-	return (
-		<div className="area-overview-container">
-			<h2>Area Overview</h2>
-			{loading && <div>Loading reports...</div>}
-			{error && <div className="error">{error}</div>}
-			{!loading && !error && reports.length === 0 && <div>No reports found for this area.</div>}
-			<ul>
-				{reports.map((report) => (
-					<li key={report.id || report._id} style={{ marginBottom: '1rem', borderBottom: '1px solid #ccc', paddingBottom: '0.5rem' }}>
-						<strong>{report.title}</strong>
-						<div>{report.description}</div>
-						<div><em>Location:</em> {report.location}</div>
-						<div><em>Date:</em> {report.createdAt ? new Date(report.createdAt).toLocaleString() : 'N/A'}</div>
-					</li>
-				))}
-			</ul>
-		</div>
-	);
+		return (
+			<div className="container my-4">
+				<h2 className="mb-4">Area Overview</h2>
+				{loading && <div className="alert alert-info">Loading reports...</div>}
+				{error && <div className="alert alert-danger">{error}</div>}
+				{!loading && !error && reports.length === 0 && (
+					<div className="alert alert-secondary">No reports found for this area.</div>
+				)}
+				<div className="row g-3">
+					{reports.map((report) => (
+						<div className="col-12 col-md-6 col-lg-4" key={report.id || report._id}>
+							<div className="card h-100 shadow-sm">
+								<div className="card-body">
+									<h5 className="card-title">{report.title}</h5>
+									<p className="card-text">{report.description}</p>
+									<p className="card-text mb-1"><span className="fw-semibold">Location:</span> {report.location}</p>
+									<p className="card-text"><span className="fw-semibold">Date:</span> {report.createdAt ? new Date(report.createdAt).toLocaleString() : 'N/A'}</p>
+								</div>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		);
 };
 
 export default AreaOverview;

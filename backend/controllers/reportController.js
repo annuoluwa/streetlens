@@ -3,10 +3,9 @@ const reportModel = require('../models/reportModel');
 
 
 
-
-
 const createReport = async (req, res) => {
   try {
+
     // Require authentication
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: 'Authentication required to submit a report' });
@@ -30,26 +29,11 @@ const createReport = async (req, res) => {
     // Multiple files (multer array)
     const evidenceFiles = req.files;
 
-    if (!title || !description || !street) {
-      return res.status(400).json({ message: 'Title, description, and street are required' });
+    if (!title || !description || !street || !postcode) {
+      return res.status(400).json({ message: 'Title, description, street, and postcode are required' });
     }
 
-    // Debug: log incoming data and user
-    console.log('Creating report with:', {
-      userId: req.user && req.user.id,
-      title,
-      description,
-      city,
-      postcode,
-      street,
-      property_type,
-      flat_number,
-      landlord_or_agency,
-      advert_source,
-      category,
-      is_anonymous,
-      evidenceFiles: evidenceFiles ? evidenceFiles.map(f => f.filename) : []
-    });
+
 
     // Insert report 
     const result = await pool.query(
@@ -76,6 +60,7 @@ const createReport = async (req, res) => {
 
     const report = result.rows[0];
 
+
     // Insert evidence files
     if (evidenceFiles && evidenceFiles.length > 0) {
       for (const file of evidenceFiles) {
@@ -85,38 +70,6 @@ const createReport = async (req, res) => {
         );
       }
     }
-
-
-    // Delete a report (user can only delete their own, or admin)
-const deleteReport = async (req, res) => {
-  try {
-    // Require authentication
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-    const { id } = req.params;
-    // Get the report to check ownership
-    const reportRes = await pool.query('SELECT user_id FROM reports WHERE id = $1', [id]);
-    if (reportRes.rows.length === 0) {
-      return res.status(404).json({ message: 'Report not found' });
-    }
-    const reportOwnerId = reportRes.rows[0].user_id;
-    // Only allow if user is owner or admin
-    const isAdmin = req.user && req.user.role === 'admin';
-    if (reportOwnerId !== req.user.id && !isAdmin) {
-      return res.status(403).json({ message: 'Permission denied: insufficient privileges to delete this report.' });
-    }
-    // Delete evidence files first (if any)
-    await pool.query('DELETE FROM evidence_files WHERE report_id = $1', [id]);
-    // Delete the report
-    await pool.query('DELETE FROM reports WHERE id = $1', [id]);
-    res.status(200).json({ message: 'Report deleted successfully' });
-  } catch (error) {
-    console.error('Error in deleteReport:', error);
-    res.status(500).json({ message: 'Failed to delete report', error: error.message });
-  }
-};
-
 
     // Threshold logic: count recent reports for this property
     const { countRecentReports, flagRecentReports } = require('../models/reportModel');
@@ -143,16 +96,47 @@ const deleteReport = async (req, res) => {
           count
         });
       } catch (notifyErr) {
-        console.error('Failed to send admin notification:', notifyErr);
+
       }
     }
 
     res.status(201).json(report);
   } catch (error) {
-    console.error('Error in createReport:', error);
+
     res.status(500).json({ message: 'Failed to create report', error: error.message, stack: error.stack });
   }
+}
+
+// Delete a report (user can only delete their own, or admin)
+const deleteReport = async (req, res) => {
+  try {
+    // Require authentication
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    const { id } = req.params;
+    // Get the report to check ownership
+    const reportRes = await pool.query('SELECT user_id FROM reports WHERE id = $1', [id]);
+    if (reportRes.rows.length === 0) {
+      return res.status(404).json({ message: 'Report not found' });
+    }
+    const reportOwnerId = reportRes.rows[0].user_id;
+    // Only allow if user is owner or admin
+    const isAdmin = req.user && req.user.role === 'admin';
+    if (reportOwnerId !== req.user.id && !isAdmin) {
+      return res.status(403).json({ message: 'Permission denied: insufficient privileges to delete this report.' });
+    }
+    // Delete evidence files first (if any)
+    await pool.query('DELETE FROM evidence_files WHERE report_id = $1', [id]);
+    // Delete the report
+    await pool.query('DELETE FROM reports WHERE id = $1', [id]);
+    res.status(200).json({ message: 'Report deleted successfully' });
+  } catch (error) {
+
+    res.status(500).json({ message: 'Failed to delete report', error: error.message });
+  }
 };
+
 
 
 const getReports = async (req, res) => {
@@ -207,7 +191,7 @@ const getReports = async (req, res) => {
       data: reports
     });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: 'Failed to fetch reports' });
   }
 };
@@ -229,8 +213,69 @@ const getReportById = async (req, res) => {
     report.evidence_files = evidenceRes.rows.map(row => row.file_name);
     res.status(200).json(report);
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: 'Failed to fetch report' });
+  }
+};
+
+
+// Admin: verify (approve/reject) a flagged report
+// Enhanced: When an admin approves a flagged report, route it to the correct authority
+const getAuthorityForReport = require('../utils/getAuthorityForReport');
+const sendToAuthority = require('../utils/sendToAuthority');
+
+/**
+ * Admin: verify (approve/reject) a flagged report.
+ * If approved, escalate the report to the mapped authority (email/API/etc).
+ * Responds with the routed authority for transparency.
+ */
+const verifyReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // status: 'approved' or 'rejected'
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status. Must be "approved" or "rejected".' });
+    }
+    // Only admin can verify
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin privileges required.' });
+    }
+    // If approved, fetch the report and route to authority
+    let routedAuthority = null;
+    if (status === 'approved') {
+      // Fetch the full report details
+      const report = await reportModel.getReportById(id);
+      if (!report) {
+        return res.status(404).json({ message: 'Report not found.' });
+      }
+      // Determine the correct authority for this report
+      routedAuthority = getAuthorityForReport(report);
+
+      try {
+        await sendToAuthority(routedAuthority, report);
+      } catch (sendErr) {
+
+        return res.status(500).json({ message: 'Failed to escalate report to authority', error: sendErr.message });
+      }
+      // Reset escalation threshold for this apartment
+      const { resetEscalationThreshold } = require('../models/reportModel');
+      await resetEscalationThreshold({
+        postcode: report.postcode,
+        street: report.street,
+        flat_number: report.flat_number
+      });
+    }
+    // Update report verification status in DB
+    // Pass boolean to verifyReportStatus: true if approved, false otherwise
+    const updated = await reportModel.verifyReportStatus(id, status === 'approved');
+    if (!updated) {
+      return res.status(404).json({ message: 'Report not found or not flagged.' });
+    }
+    // Respond with routing info if escalated
+    res.status(200).json({ message: `Report ${status}`, routedTo: routedAuthority });
+  } catch (error) {
+
+    res.status(500).json({ message: 'Failed to verify report' });
   }
 };
 
@@ -239,4 +284,5 @@ module.exports = {
   getReports,
   getReportById,
   deleteReport,
+  verifyReport
 };

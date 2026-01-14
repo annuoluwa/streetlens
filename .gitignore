@@ -39,3 +39,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+
+# uploads and runtime logs (keep folders, ignore contents)
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/logs/*
+!backend/logs/.gitkeep
+

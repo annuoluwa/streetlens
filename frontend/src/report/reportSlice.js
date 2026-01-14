@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/api';
 
-// Async thunks
+// Thunks
 export const fetchReports = createAsyncThunk('reports/fetchReports', async (_, thunkAPI) => {
 	try {
 		const response = await api.get('/reports');
-		// The backend returns { page, limit, total, totalPages, data: [...] }
+
 		return response.data.data || [];
 	} catch (error) {
 		return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch reports');
