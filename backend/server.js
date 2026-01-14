@@ -1,13 +1,11 @@
 require('dotenv').config();
 
 const express = require('express');
-const app = express();
-
-// Winston logger setup
+const path = require('path');
+const cors = require('cors');
 const winston = require('winston');
-const transports = [];
-// Log to Console in all environments; production logs appear in Render dashboard
-transports.push(new winston.transports.Console());
+
+const app = express();
 
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
@@ -17,56 +15,58 @@ const logger = winston.createLogger({
       return `[${timestamp}] ${level}: ${message}`;
     })
   ),
-  transports,
+  transports: [new winston.transports.Console()],
 });
-
-const path = require('path');
-const cors = require('cors');
-
 
 app.use(cors());
 app.use(express.json());
-
-// Serve uploads folder statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
 const authRoutes = require('./routes/authRoutes');
-app.use('/api/auth', authRoutes);
-
-
 const commentRoutes = require('./routes/commentRoutes');
-app.use('/api', commentRoutes);
-
 const reportRoutes = require('./routes/reportRoutes');
-app.use('/api/reports', reportRoutes);
-
 const evidenceRoutes = require('./routes/evidenceRoutes');
-app.use('/api', evidenceRoutes);
-
-
 const userRoutes = require('./routes/userRoutes');
+
+app.use('/api/auth', authRoutes);
+app.use('/api', commentRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api', evidenceRoutes);
 app.use('/api/users', userRoutes);
 
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, env: process.env.NODE_ENV || 'undefined' });
+});
 
-// Serve React build in production (single host)
 if (process.env.NODE_ENV === 'production') {
-  const frontendBuildPath = path.join(__dirname, '../frontend/build');
-  app.use(express.static(frontendBuildPath));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  const frontendRoot = path.resolve(__dirname, '../frontend');
+
+  const buildPath = path.join(frontendRoot, 'build');
+  const distPath = path.join(frontendRoot, 'dist');
+
+  const fs = require('fs');
+  const usePath = fs.existsSync(path.join(distPath, 'index.html'))
+    ? distPath
+    : buildPath;
+
+  app.use(express.static(usePath));
+
+  app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.join(usePath, 'index.html'));
   });
 } else {
-  // Development root message
   app.get('/', (req, res) => {
     res.send('StreetLens running!');
   });
 }
 
 const PORT = process.env.PORT || 8000;
+
 if (require.main === module) {
   app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
+    logger.info(
+      `Server running on port ${PORT} (NODE_ENV=${process.env.NODE_ENV || 'undefined'})`
+    );
   });
 }
 
