@@ -49,16 +49,17 @@ const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
 
-app.get('/', (req, res) => {
-  res.send('StreetLens running!');
-});
-
 // Serve React build in production (single host)
 if (process.env.NODE_ENV === 'production') {
   const frontendBuildPath = path.join(__dirname, '../frontend/build');
   app.use(express.static(frontendBuildPath));
   app.get('*', (req, res) => {
     res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+} else {
+  // Development root message
+  app.get('/', (req, res) => {
+    res.send('StreetLens running!');
   });
 }
 
