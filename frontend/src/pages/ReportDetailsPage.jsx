@@ -80,7 +80,7 @@ const ReportDetailsPage = () => {
 
   // Images: report.evidence_files (array of filenames)
   const images = Array.isArray(report.evidence_files) ? report.evidence_files : [];
-  const imageBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+  const imageBaseUrl = process.env.REACT_APP_API_URL || window.location.origin;
 
   const handlePrev = () => {
     setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));

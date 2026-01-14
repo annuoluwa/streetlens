@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const API_BASE = process.env.REACT_APP_API_URL || window.location.origin;
+
 const AdminDashboard = () => {
   const { user, token } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -21,7 +23,7 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await axios.get('http://localhost:8000/api/reports?admin_flagged=true', {
+        const res = await axios.get(`${API_BASE}/api/reports?admin_flagged=true`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setReports(res.data.data || []);
@@ -71,7 +73,7 @@ const AdminDashboard = () => {
                           className="btn btn-success btn-sm me-2"
                           onClick={async () => {
                             try {
-                              await axios.post(`http://localhost:8000/api/reports/${report.id}/verify`, { status: 'approved' }, {
+                              await axios.post(`${API_BASE}/api/reports/${report.id}/verify`, { status: 'approved' }, {
                                 headers: { Authorization: `Bearer ${token}` },
                               });
                               setReports((prev) => prev.filter((r) => r.id !== report.id));
@@ -88,7 +90,7 @@ const AdminDashboard = () => {
                           className="btn btn-danger btn-sm"
                           onClick={async () => {
                             try {
-                              await axios.post(`http://localhost:8000/api/reports/${report.id}/verify`, { status: 'rejected' }, {
+                              await axios.post(`${API_BASE}/api/reports/${report.id}/verify`, { status: 'rejected' }, {
                                 headers: { Authorization: `Bearer ${token}` },
                               });
                               setReports((prev) => prev.filter((r) => r.id !== report.id));

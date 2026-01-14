@@ -1,12 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+const API_BASE = process.env.REACT_APP_API_URL || window.location.origin;
 
 // Async thunk to fetch flagged reports count
 export const fetchFlaggedReportsCount = createAsyncThunk(
   'flaggedReports/fetchCount',
   async (token, { rejectWithValue }) => {
     try {
-      const res = await axios.get('http://localhost:8000/api/reports?admin_flagged=true', {
+      const res = await axios.get(`${API_BASE}/api/reports?admin_flagged=true`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return res.data.data ? res.data.data.length : 0;

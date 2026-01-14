@@ -5,20 +5,9 @@ const app = express();
 
 // Winston logger setup
 const winston = require('winston');
-const fs = require('fs');
-const logDir = 'logs';
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir);
-}
-
 const transports = [];
-if (process.env.NODE_ENV === 'production') {
-  transports.push(
-    new winston.transports.File({ filename: `${logDir}/server.log`, level: 'info' })
-  );
-} else {
-  transports.push(new winston.transports.Console());
-}
+// Log to Console in all environments; production logs appear in Render dashboard
+transports.push(new winston.transports.Console());
 
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
@@ -63,6 +52,15 @@ app.use('/api/users', userRoutes);
 app.get('/', (req, res) => {
   res.send('StreetLens running!');
 });
+
+// Serve React build in production (single host)
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '../frontend/build');
+  app.use(express.static(frontendBuildPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+}
 
 const PORT = process.env.PORT || 8000;
 if (require.main === module) {

@@ -26,7 +26,7 @@ const HomeFeed = () => {
 				<div className="row g-3">
 					{reportList.map((report) => {
 						const imageUrl = report.evidence
-							? `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/uploads/${report.evidence}`
+							? `${process.env.REACT_APP_API_URL || window.location.origin}/uploads/${report.evidence}`
 							: null;
 						return (
 							<div
