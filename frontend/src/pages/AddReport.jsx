@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { addReport } from '../report/reportSlice';
 import styles from './AddReport.module.css';
 
 const AddReport = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.reports);
-  const { user } = useSelector((state) => state.user);
+  const { user, token } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   const [showAuthMessage, setShowAuthMessage] = useState(false);
@@ -72,6 +73,20 @@ const AddReport = () => {
     );
   };
 
+  const uploadEvidenceFiles = async (reportId, evidenceFiles) => {
+    for (const f of evidenceFiles) {
+      const evidenceForm = new FormData();
+      evidenceForm.append('file', f);
+
+      await axios.post(`/api/reports/${reportId}/evidence`, evidenceForm, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -105,25 +120,36 @@ const AddReport = () => {
     }
     if (!valid) return;
 
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('city', city);
-    formData.append('flat_number', flatNumber);
-    formData.append('postcode', postcode);
-    formData.append('street', street);
-    formData.append('property_type', propertyType);
-    formData.append('landlord_or_agency', landlordOrAgency);
-    formData.append('advert_source', advertSource);
-    formData.append('category', category === 'Other' ? customCategory : category);
-    formData.append('is_anonymous', String(isAnonymous));
-    formData.append('flagged', String(flagged));
+    const reportPayload = {
+      title,
+      description,
+      city,
+      flat_number: flatNumber,
+      postcode,
+      street,
+      property_type: propertyType,
+      landlord_or_agency: landlordOrAgency,
+      advert_source: advertSource,
+      category: category === 'Other' ? customCategory : category,
+      is_anonymous: String(isAnonymous),
+      flagged: String(flagged),
+    };
 
-    files.forEach((file) => formData.append('evidence', file));
-
-    const resultAction = await dispatch(addReport(formData));
+    const resultAction = await dispatch(addReport(reportPayload));
 
     if (addReport.fulfilled.match(resultAction)) {
+      const createdReport = resultAction.payload;
+      const reportId = createdReport?.id;
+
+      if (reportId) {
+        try {
+          await uploadEvidenceFiles(reportId, files);
+        } catch (uploadErr) {
+          setFileError('Report created, but evidence upload failed.');
+          return;
+        }
+      }
+
       setSuccess(true);
 
       setTitle('');
@@ -141,8 +167,6 @@ const AddReport = () => {
       setFlagged(false);
       setFiles([]);
       setFilePreviews([]);
-
-      // navigate('/reports');
     }
   };
 
@@ -164,7 +188,7 @@ const AddReport = () => {
     <div className={styles.addReportContainer}>
       <div className={styles.header}>Submit a Report</div>
 
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
+      <form onSubmit={handleSubmit}>
         <div className={styles.formGroup}>
           <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>
             Flagged as:
@@ -238,7 +262,9 @@ const AddReport = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Postcode <span style={{ color: '#e74c3c' }}>*</span>:</label>
+          <label className={styles.label}>
+            Postcode <span style={{ color: '#e74c3c' }}>*</span>:
+          </label>
           <input
             className={styles.input}
             type="text"
@@ -264,7 +290,9 @@ const AddReport = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Street <span style={{ color: '#e74c3c' }}>*</span>:</label>
+          <label className={styles.label}>
+            Street <span style={{ color: '#e74c3c' }}>*</span>:
+          </label>
           <input
             className={styles.input}
             type="text"
