@@ -38,6 +38,17 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, env: process.env.NODE_ENV || 'undefined' });
 });
 
+const pool = require('./db/db');
+
+app.get('/api/db-health', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT current_database() AS db, current_user AS usr');
+    res.json({ ok: true, ...r.rows[0] });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 if (process.env.NODE_ENV === 'production') {
   const frontendRoot = path.resolve(__dirname, '../frontend');
 
