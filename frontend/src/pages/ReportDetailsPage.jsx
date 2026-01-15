@@ -81,6 +81,10 @@ const ReportDetailsPage = () => {
   // Images: report.evidence_files (array of filenames)
   const images = Array.isArray(report.evidence_files) ? report.evidence_files : [];
   const imageBaseUrl = process.env.REACT_APP_API_URL || window.location.origin;
+  const getImageSrc = (image) => {
+    if (!image) return null;
+    return image.file_url || (image.file_name ? `${imageBaseUrl}/uploads/${image.file_name}` : null);
+  };
 
   const handlePrev = () => {
     setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -182,13 +186,13 @@ const ReportDetailsPage = () => {
           </div>
         )}
         {deleteError && <div className="alert alert-danger py-2 mb-2">{deleteError}</div>}
-        {images.length > 0 && (
+        {images.length > 0 && getImageSrc(images[currentImage]) && (
           <div className="d-flex align-items-center justify-content-center mb-3 gap-2">
             <button className="btn btn-outline-secondary btn-sm" onClick={handlePrev}>&lt;</button>
             <img
               className="rounded border"
               style={{ maxHeight: 260, maxWidth: '100%' }}
-              src={`${imageBaseUrl}/uploads/${images[currentImage]}`}
+              src={getImageSrc(images[currentImage])}
               alt={`Evidence ${currentImage + 1}`}
             />
             <button className="btn btn-outline-secondary btn-sm" onClick={handleNext}>&gt;</button>

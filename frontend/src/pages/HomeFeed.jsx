@@ -25,9 +25,12 @@ const HomeFeed = () => {
 				)}
 				<div className="row g-3">
 					{reportList.map((report) => {
-						const imageUrl = report.evidence
-							? `${process.env.REACT_APP_API_URL || window.location.origin}/uploads/${report.evidence}`
-							: null;
+						const baseOrigin = process.env.REACT_APP_API_URL || window.location.origin;
+						const imageUrl = report.evidence_url
+							? report.evidence_url
+							: report.evidence
+								? `${baseOrigin}/uploads/${report.evidence}`
+								: null;
 						return (
 							<div
 								key={report.id || report._id}

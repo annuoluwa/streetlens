@@ -133,7 +133,10 @@ const getFilteredReports = async ({ search, city, category, admin_flagged, limit
   let baseQuery = `
     SELECT r.*, (
       SELECT file_name FROM evidence_files ef WHERE ef.report_id = r.id ORDER BY ef.id ASC LIMIT 1
-    ) AS evidence
+    ) AS evidence,
+    (
+      SELECT file_url FROM evidence_files ef WHERE ef.report_id = r.id ORDER BY ef.id ASC LIMIT 1
+    ) AS evidence_url
     FROM reports r
     WHERE 1=1
   `;
