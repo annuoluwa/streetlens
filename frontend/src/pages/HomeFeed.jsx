@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchReports } from '../report/reportSlice';
 import { useNavigate } from 'react-router-dom';
+import LogoSpinner from '../components/Spinner/LogoSpinner';
 
 
 const HomeFeed = () => {
@@ -18,7 +19,7 @@ const HomeFeed = () => {
 		return (
 			<div className="container my-4">
 				<h2 className="mb-4">Latest Reports</h2>
-				{loading && <div className="alert alert-info">Loading reports...</div>}
+				{loading && <LogoSpinner message="Loading reports..." />}
 				{error && <div className="alert alert-danger">{error}</div>}
 				{!loading && !error && reportList.length === 0 && (
 					<div className="alert alert-secondary">No reports available.</div>

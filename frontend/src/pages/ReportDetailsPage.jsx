@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import api from '../utils/api';
 import { deleteReport as deleteReportApi } from '../utils/deleteReport';
 import styles from './ReportDetailsPage.module.css';
+import LogoSpinner from '../components/Spinner/LogoSpinner';
 
 const ReportDetailsPage = () => {
   const { id } = useParams();
@@ -74,7 +75,7 @@ const ReportDetailsPage = () => {
 
 
 
-  if (loading) return <div className="alert alert-info">Loading...</div>;
+  if (loading) return <LogoSpinner message="Loading report..." />;
   if (error) return <div className="alert alert-danger">{error}</div>;
   if (!report) return <div className="alert alert-secondary">No report found.</div>;
 

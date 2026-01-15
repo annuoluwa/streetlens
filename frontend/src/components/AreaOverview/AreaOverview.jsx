@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchReports } from '../../report/reportSlice';
+import LogoSpinner from '../Spinner/LogoSpinner';
 
 const AreaOverview = () => {
 	const dispatch = useDispatch();
@@ -13,7 +14,7 @@ const AreaOverview = () => {
 		return (
 			<div className="container my-4">
 				<h2 className="mb-4">Area Overview</h2>
-				{loading && <div className="alert alert-info">Loading reports...</div>}
+				{loading && <LogoSpinner message="Loading reports..." />}
 				{error && <div className="alert alert-danger">{error}</div>}
 				{!loading && !error && reports.length === 0 && (
 					<div className="alert alert-secondary">No reports found for this area.</div>

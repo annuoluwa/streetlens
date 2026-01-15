@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchReports } from '../report/reportSlice';
+import LogoSpinner from '../components/Spinner/LogoSpinner';
 
 
 
@@ -110,7 +111,7 @@ const AreaOverview = () => {
 							</select>
 						</div>
 					</div>
-					{loading && <div className="alert alert-info">Loading reports...</div>}
+					{loading && <LogoSpinner message="Loading reports..." />}
 					{error && <div className="alert alert-danger">{error}</div>}
 					{!loading && !error && filteredReports.length === 0 && (
 						<div className="alert alert-secondary">No reports found for this area.</div>

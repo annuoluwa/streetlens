@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import LogoSpinner from '../components/Spinner/LogoSpinner';
 
 const API_BASE = process.env.REACT_APP_API_URL || window.location.origin;
 
@@ -43,7 +44,7 @@ const AdminDashboard = () => {
       <div className="card shadow-sm">
         <div className="card-body">
           <h2 className="card-title mb-4">Admin Dashboard</h2>
-          {loading && <div className="alert alert-info">Loading flagged reports...</div>}
+          {loading && <LogoSpinner message="Loading flagged reports..." />}
           {error && <div className="alert alert-danger">{error}</div>}
           {success && <div className="alert alert-success">{success}</div>}
           {!loading && reports.length === 0 && <div className="alert alert-secondary">No flagged reports found.</div>}
