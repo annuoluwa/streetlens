@@ -25,22 +25,21 @@ const saveEvidence = async (req, res) => {
     const uploadResult = await uploadBufferToCloudinary(file.buffer, 'streetlens');
 
     const result = await pool.query(
-      `INSERT INTO evidence_files (report_id, user_id, file_name, file_type, file_size, file_url, cloudinary_public_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO evidence_files (report_id, file_name, file_type, file_size, file_url)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
       [
         reportId,
-        req.user.id,
         file.originalname,
         file.mimetype,
         file.size,
-        uploadResult.secure_url,
-        uploadResult.public_id
+        uploadResult.secure_url
       ]
     );
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
+    console.error('Evidence upload failed:', error);
     res.status(500).json({ message: 'Failed to upload evidence', error: error.message });
   }
 };
