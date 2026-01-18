@@ -8,33 +8,32 @@
 }
 
 .spinner {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
+  border-radius: 50%;
+  box-shadow: 0 4px 24px 0 #0d6efd22, 0 1.5px 8px 0 #0d6efd11;
+  background: linear-gradient(135deg, #e3f0ff 0%, #f8fbff 100%);
+  padding: 8px;
   transform-style: preserve-3d;
-  animation: spin 2.2s ease-in-out infinite;
+  animation: spin 1.4s cubic-bezier(0.4, 0.2, 0.2, 1) infinite;
 }
 
 .message {
-  font-size: 0.95rem;
+  font-size: 1.08rem;
   color: #0d6efd;
   text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  margin-top: 0.5rem;
+  text-shadow: 0 1px 2px #e3f0ff;
 }
 
 @keyframes spin {
   0% {
-    transform: translateY(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
-  }
-  25% {
-    transform: translateY(-12px) rotateX(10deg) rotateY(90deg) rotateZ(-90deg);
-  }
-  50% {
-    transform: translateY(0px) rotateX(0deg) rotateY(180deg) rotateZ(-180deg);
-  }
-  75% {
-    transform: translateY(12px) rotateX(-10deg) rotateY(270deg) rotateZ(-270deg);
+    transform: rotateZ(0deg);
   }
   100% {
-    transform: translateY(0px) rotateX(0deg) rotateY(360deg) rotateZ(-360deg);
+    transform: rotateZ(360deg);
   }
 }
