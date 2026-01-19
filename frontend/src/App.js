@@ -14,8 +14,18 @@ import ReportDetailsPage from './pages/ReportDetailsPage';
 
 import AdminDashboard from './pages/AdminDashboard';
 import ProfilePage from './pages/ProfilePage';
+import { useEffect } from 'react';
+import { fetchCsrfToken } from './utils/api';
+import { useDispatch } from 'react-redux';
+import { logout } from './user/userSlice';
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Removed CSRF token fetching since CSRF is disabled
+    // fetchCsrfToken();
+  }, []);
   return (
     <Router>
       <NavBar />

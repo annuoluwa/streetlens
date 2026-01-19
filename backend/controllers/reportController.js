@@ -1,5 +1,6 @@
 const pool = require('../db/db');
 const reportModel = require('../models/reportModel');
+const logger = require('../logger');
 
 const createReport = async (req, res) => {
   try {
@@ -79,7 +80,8 @@ const createReport = async (req, res) => {
 
     res.status(201).json(report);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to create report', error: error.message, stack: error.stack });
+    logger.error(error);
+     res.status(500).json({ message: 'Failed to create report', error: error.message, stack: error.stack });
   }
 };
 
@@ -108,7 +110,8 @@ const deleteReport = async (req, res) => {
 
     res.status(200).json({ message: 'Report deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to delete report', error: error.message });
+    logger.error(error);
+     res.status(500).json({ message: 'Failed to delete report', error: error.message });
   }
 };
 
@@ -163,7 +166,8 @@ const getReports = async (req, res) => {
       data: reports
     });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch reports' });
+    logger.error(error);
+     res.status(500).json({ message: 'Failed to fetch reports' });
   }
 };
 
@@ -185,7 +189,8 @@ const getReportById = async (req, res) => {
 
     res.status(200).json(report);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch report' });
+    logger.error(error);
+     res.status(500).json({ message: 'Failed to fetch report' });
   }
 };
 
@@ -236,7 +241,8 @@ const verifyReport = async (req, res) => {
 
     res.status(200).json({ message: `Report ${status}`, routedTo: routedAuthority });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to verify report' });
+    logger.error(error);
+     res.status(500).json({ message: 'Failed to verify report' });
   }
 };
 

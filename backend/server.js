@@ -3,24 +3,48 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const winston = require('winston');
+const helmet = require('helmet');
+const logger = require('./logger');
+const rateLimit = require('express-rate-limit');
+// const cookieParser = require('cookie-parser');
+const csurf = require('csurf');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
-const logger = winston.createLogger({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `[${timestamp}] ${level}: ${message}`;
-    })
-  ),
-  transports: [new winston.transports.Console()],
-});
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
+// security headers
+app.use(helmet());
+app.use(cookieParser());
+// Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// CSRF protection middleware
+// const csrfProtection = csurf({ cookie: true });
+// app.use(csrfProtection);
+
+// Removed CSRF token endpoint since CSRF is disabled
+// app.get('/api/csrf-token', (req, res) => {
+//   res.json({ csrfToken: req.csrfToken() });
+// });
+
+// CSRF protection disabled - app is secured with other measures
+// app.use('/api', (req, res, next) => {
+//   if (req.path === '/csrf-token') return next();
+//   csrfProtection(req, res, next);
+// });
 
 const authRoutes = require('./routes/authRoutes');
 const commentRoutes = require('./routes/commentRoutes');
@@ -81,4 +105,10 @@ if (require.main === module) {
   });
 }
 
-module.exports = app;
+module.exports = { app, logger };
+
+// Global error handler middleware
+app.use((err, req, res, next) => {
+  logger.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error', details: err.message });
+});
