@@ -19,7 +19,17 @@ app.use(cors({
 }));
 app.use(express.json());
 // security headers
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles if needed
+      // Add other directives as necessary
+    },
+  },
+}));
 app.use(cookieParser());
 // Rate limiting middleware
 const limiter = rateLimit({
