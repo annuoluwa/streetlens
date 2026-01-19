@@ -114,6 +114,27 @@ const NavBar = () => {
                   Area Overview
                 </NavLink>
               </li>
+              <li className="nav-item">
+                <NavLink
+                  to="/about"
+                  className={({ isActive }) =>
+                    isActive ? 'nav-link active streetlens-active' : 'nav-link'
+                  }
+                  style={({ isActive }) =>
+                    isActive
+                      ? {
+                          color: '#fff',
+                          background: '#21618c',
+                          fontWeight: 'bold',
+                          borderRadius: 4,
+                          boxShadow: '0 1px 4px rgba(44,62,80,0.10)'
+                        }
+                      : { color: '#fff', fontWeight: 400 }
+                  }
+                >
+                  About
+                </NavLink>
+              </li>
               {user && user.role === 'admin' && (
                 <li className="nav-item position-relative d-flex align-items-center" style={{ minWidth: 60, marginRight: '0.2rem' }}>
                   <NavLink
