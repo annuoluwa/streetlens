@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchReports } from '../report/reportSlice';
 import { useNavigate } from 'react-router-dom';
 import LogoSpinner from '../components/Spinner/LogoSpinner';
+import { resolveEvidenceImageUrl } from '../utils/getImageUrl';
 
 
 const HomeFeed = () => {
@@ -31,12 +32,10 @@ const HomeFeed = () => {
 						)}
 						<div className="row g-3">
 							{reportList.map((report) => {
-								const baseOrigin = process.env.REACT_APP_API_URL || window.location.origin;
-								const imageUrl = report.evidence_url
-									? report.evidence_url
-									: report.evidence
-										? `${baseOrigin}/uploads/${report.evidence}`
-										: null;
+								const imageUrl = resolveEvidenceImageUrl({
+									evidenceUrl: report.evidence_url,
+									evidenceFileName: report.evidence
+								});
 								return (
 									<div
 										key={report.id || report._id}

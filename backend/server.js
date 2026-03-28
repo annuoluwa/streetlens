@@ -29,6 +29,8 @@ app.use(helmet({
       // Add other directives as necessary
     },
   },
+  // Allow resources (like images) to be used cross-origin
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 app.use(cookieParser());
 // Rate limiting middleware
@@ -39,6 +41,13 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 app.use(limiter);
+// Set CORS headers for uploads BEFORE static middleware (no duplicates)
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+  res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // CSRF protection middleware
@@ -61,12 +70,14 @@ const commentRoutes = require('./routes/commentRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const evidenceRoutes = require('./routes/evidenceRoutes');
 const userRoutes = require('./routes/userRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api', commentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api', evidenceRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api', contactRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, env: process.env.NODE_ENV || 'undefined' });

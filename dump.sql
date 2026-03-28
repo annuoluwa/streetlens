@@ -354,13 +354,13 @@ COPY public.expenses (expense_id, title, price, category, essential, created_at)
 --
 
 COPY public.reports (id, user_id, title, description, city, postcode, street, property_type, landlord_or_agency, advert_source, category, is_anonymous, created_at, is_flagged, flat_number, admin_flagged, admin_verified, last_escalated_at) FROM stdin;
-34	7	Dirty	Dirty	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 17:01:13.271849	t	Flat 12	t	f	\N
-35	7	Dirty	Dirty	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 17:05:52.500569	t	Flat 12	t	f	\N
-37	7	Dirty	Dirty	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 17:10:20.549248	t	Flat12	t	f	\N
-41	7	Dirty	Dirty	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 19:07:06.667248	t	Flat12	f	f	\N
-40	7	Dirty	Dirty	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 18:51:14.910544	t	Flat 12	f	t	\N
-39	7	Dirty	Dirty	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 18:23:04.750642	t	Flat12	f	f	\N
-38	7	Dirty	The environment is so dirty.	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 17:54:28.179355	t	Flat12	f	t	\N
+34	7	Unclean shared spaces	Kitchen and bathroom are never cleaned by housemates.	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 17:01:13.271849	t	Flat 12	t	f	\N
+35	7	Poor hygiene from housemates	Shared areas are left dirty and bins are overflowing.	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 17:05:52.500569	t	Flat 12	t	f	\N
+37	7	Kitchen not maintained	Oven, sink and worktops are greasy and never wiped.	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 17:10:20.549248	t	Flat12	t	f	\N
+41	7	Rubbish left in corridors	Rubbish bags are left in the hallway for days.	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 19:07:06.667248	t	Flat12	f	f	\N
+40	7	Unsanitary bathroom	Mould, limescale and grime build-up in the bathroom.	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 18:51:14.910544	t	Flat 12	f	t	\N
+39	7	Dirty carpets and walls	Stains on carpets and marks on walls not cleaned.	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 18:23:04.750642	t	Flat12	f	f	\N
+38	7	Overall dirty environment	The environment is so dirty.	Sunderland	S13 5ap	Midville	\N	\N	\N	Health Hazard	t	2026-01-12 17:54:28.179355	t	Flat12	f	t	\N
 31	7	Dubious landlord	He never returns deposits	LONDON	SW12 6AP	Baker Street	Studio	John Bull	Facebook	Cheat	t	2026-01-12 16:53:47.215152	t	Unit 5	f	f	\N
 32	7	Mould	The house is moldy.	Manchester	M13 5ap	edgeware	Studio	Acme Lettings	Gumtree	Health Hazard	t	2026-01-12 16:55:53.725155	t	Flat 5	f	f	\N
 33	7	Don't rent from this landlord	He always picks a fight with his tenants.	Bristol	B13 5ap	Edgeware	Studio	Agency	Facebook	Noisy environment	t	2026-01-12 16:58:37.427374	t	Flat 4	f	f	\N

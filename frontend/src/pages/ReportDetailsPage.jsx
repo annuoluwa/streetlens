@@ -6,6 +6,7 @@ import api from '../utils/api';
 import { deleteReport as deleteReportApi } from '../utils/deleteReport';
 import styles from './ReportDetailsPage.module.css';
 import LogoSpinner from '../components/Spinner/LogoSpinner';
+import { resolveEvidenceImageUrl } from '../utils/getImageUrl';
 
 const ReportDetailsPage = () => {
   const { id } = useParams();
@@ -81,10 +82,12 @@ const ReportDetailsPage = () => {
 
   // Images: report.evidence_files (array of filenames)
   const images = Array.isArray(report.evidence_files) ? report.evidence_files : [];
-  const imageBaseUrl = process.env.REACT_APP_API_URL || window.location.origin;
   const getImageSrc = (image) => {
     if (!image) return null;
-    return image.file_url || (image.file_name ? `${imageBaseUrl}/uploads/${image.file_name}` : null);
+    return resolveEvidenceImageUrl({
+      evidenceUrl: image.file_url,
+      evidenceFileName: image.file_name
+    });
   };
 
   const handlePrev = () => {

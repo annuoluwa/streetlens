@@ -84,7 +84,6 @@ const AdminDashboard = () => {
                             } catch (err) {
                               setError('Failed to approve report');
                             }
-                                    {success && <div className="alert alert-success">{success}</div>}
                           }}
                         >Approve</button>
                         <button

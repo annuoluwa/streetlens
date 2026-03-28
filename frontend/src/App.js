@@ -8,39 +8,34 @@ import Register from './pages/Register';
 
 import AddReport from './pages/AddReport';
 import HomeFeed from './pages/HomeFeed';
+import LandingPage from './pages/LandingPage';
 import AreaOverview from './pages/AreaOverview';
 import NavBar from './components/NavBar';
 import ReportDetailsPage from './pages/ReportDetailsPage';
 
 import AdminDashboard from './pages/AdminDashboard';
 import ProfilePage from './pages/ProfilePage';
-import { useEffect } from 'react';
-import { fetchCsrfToken } from './utils/api';
-import { useDispatch } from 'react-redux';
-import { logout } from './user/userSlice';
+import Contact from './pages/Contact';
 
 function App() {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    // Removed CSRF token fetching since CSRF is disabled
-    // fetchCsrfToken();
-  }, []);
   return (
     <Router>
       <NavBar />
       <div style={{ paddingTop: '4.5rem', minHeight: '80vh' }}>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/app" element={<HomeFeed />} />
+          <Route path="/dashboard" element={<HomeFeed />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/add-report" element={<AddReport />} />
           <Route path="/area-overview" element={<AreaOverview />} />
-          <Route path="/" element={<HomeFeed />} />
           <Route path="/report/:id" element={<ReportDetailsPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>
       <Footer />

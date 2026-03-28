@@ -49,13 +49,6 @@ const AreaOverview = () => {
 		'Blaenavon', 'Ebbw Vale', 'Tredegar', 'Brynmawr', 'Abertillery', 'Crickhowell', 'Hay-on-Wye'
 	];
 	const cityOptions = ukCities;
-	const categoryOptions = [
-		'Health Hazard',
-		'Security Hazard',
-		'Fire Hazard',
-		'Structural Hazard',
-		'Environmental Hazard'
-	];
 
 	// Filter and sort reports
 	const filteredReports = useMemo(() => {
@@ -117,24 +110,26 @@ const AreaOverview = () => {
 						<div className="alert alert-secondary">No reports found for this area.</div>
 					)}
 					<div className="row g-3">
-						{filteredReports.map((report) => (
-							<div className="col-12 col-md-6 col-lg-4" key={report.id || report._id}>
-								<div className="card h-100 shadow-sm">
-									<div className="card-body">
-										<h5 className="card-title">{report.title}</h5>
-										<p className="card-text">{report.description}</p>
-										<p className="card-text mb-1"><span className="fw-semibold">Location:</span> {report.city || report.location}</p>
-										<p className="card-text mb-1"><span className="fw-semibold">Date Posted:</span> {
-											report.createdAt
-												? new Date(report.createdAt).toLocaleString()
-												: report.created_at
-													? new Date(report.created_at).toLocaleString()
-													: 'N/A'
-										}</p>
+						{filteredReports.map((report) => {
+							return (
+								<div className="col-12 col-md-6 col-lg-4" key={report.id || report._id}>
+									<div className="card h-100 shadow-sm">
+										<div className="card-body">
+											<h5 className="card-title">{report.title}</h5>
+											<p className="card-text">{report.description}</p>
+											<p className="card-text mb-1"><span className="fw-semibold">Location:</span> {report.city || report.location}</p>
+											<p className="card-text mb-1"><span className="fw-semibold">Date Posted:</span> {
+												report.createdAt
+													? new Date(report.createdAt).toLocaleString()
+													: report.created_at
+														? new Date(report.created_at).toLocaleString()
+														: 'N/A'
+											}</p>
+										</div>
 									</div>
 								</div>
-							</div>
-						))}
+							);
+						})}
 					</div>
 				</div>
 			);

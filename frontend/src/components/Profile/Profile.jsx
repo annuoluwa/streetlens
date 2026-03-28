@@ -14,7 +14,6 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetMessage, setResetMessage] = useState('');
-  const [showDanger, setShowDanger] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const handleDeleteAccount = async () => {
@@ -100,13 +99,20 @@ const Profile = () => {
         <div className={styles.infoGroup}>No reports submitted yet.</div>
       ) : (
         <ul className={styles.reportList}>
-          {userReports.map(report => (
-            <li key={report.id} className={styles.reportItem}>
-              <strong>{report.title}</strong> <span style={{color:'#888'}}>{new Date(report.created_at).toLocaleString()}</span>
-              <div>{report.description}</div>
-              <div><em>Status:</em> {report.admin_flagged ? 'Flagged' : 'Normal'}</div>
-            </li>
-          ))}
+          {userReports.map((report) => {
+            return (
+              <li key={report.id} className={styles.reportItem}>
+                <strong>{report.title}</strong>{' '}
+                <span style={{ color: '#888' }}>
+                  {new Date(report.created_at).toLocaleString()}
+                </span>
+                <div>{report.description}</div>
+                <div>
+                  <em>Status:</em> {report.admin_flagged ? 'Flagged' : 'Normal'}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     <hr />
