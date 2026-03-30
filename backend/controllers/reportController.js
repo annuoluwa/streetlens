@@ -23,8 +23,8 @@ const createReport = async (req, res) => {
       flagged,
     } = req.body;
 
-    if (!title || !description || !street || !postcode) {
-      return res.status(400).json({ message: 'Title, description, street, and postcode are required' });
+    if (!title || !description) {
+      return res.status(400).json({ message: 'Title and description are required' });
     }
 
     const result = await pool.query(

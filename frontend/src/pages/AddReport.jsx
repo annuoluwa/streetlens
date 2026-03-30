@@ -110,10 +110,6 @@ const AddReport = () => {
       setCityError('City is required.');
       valid = false;
     }
-    if (!flatNumber.trim()) {
-      alert('Flat/Unit Number is required.');
-      valid = false;
-    }
     if (!files.length) {
       setFileError('Evidence file is required.');
       valid = false;
@@ -262,43 +258,34 @@ const AddReport = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>
-            Postcode <span style={{ color: '#e74c3c' }}>*</span>:
-          </label>
+          <label className={styles.label}>Postcode:</label>
           <input
             className={styles.input}
             type="text"
             value={postcode}
             onChange={(e) => setPostcode(e.target.value)}
-            required
             placeholder="e.g. SW1A 1AA"
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>
-            Flat/Unit Number <span style={{ color: '#e74c3c' }}>*</span>:
-          </label>
+          <label className={styles.label}>Flat/Unit Number:</label>
           <input
             className={styles.input}
             type="text"
             value={flatNumber}
             onChange={(e) => setFlatNumber(e.target.value)}
-            required
             placeholder="e.g. Flat 2A, Unit 5"
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>
-            Street <span style={{ color: '#e74c3c' }}>*</span>:
-          </label>
+          <label className={styles.label}>Street:</label>
           <input
             className={styles.input}
             type="text"
             value={street}
             onChange={(e) => setStreet(e.target.value)}
-            required
             placeholder="e.g. 221B Baker Street"
           />
         </div>

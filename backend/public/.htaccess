@@ -1,0 +1,6 @@
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://streetlens.kagex.co.uk/$1 [R=301,L]
+
+RewriteCond %{HTTPS} on
+RewriteRule ^(.*)$ https://streetlens.kagex.co.uk/$1 [R=301,L]
