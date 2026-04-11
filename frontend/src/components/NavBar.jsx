@@ -35,7 +35,7 @@ const NavBar = () => {
       >
         <div className="container-fluid">
           <NavLink className="navbar-brand d-flex align-items-center" to="/">
-            <img src={logo} alt="StreetLens Logo" style={{ height: 36, marginRight: 8, borderRadius: 6, background: '#fff', boxShadow: '0 1px 4px rgba(44,62,80,0.10)', padding: 2 }} />
+            <img src={logo} alt="StreetLens Logo" style={{ height: 36, marginRight: 8, borderRadius: 4, background: '#fff', boxShadow: '0 1px 4px rgba(44,62,80,0.10)', padding: 1 }} />
             <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.5rem', letterSpacing: 2 }}>StreetLens</span>
           </NavLink>
           <button
