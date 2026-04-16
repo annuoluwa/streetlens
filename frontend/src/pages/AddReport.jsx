@@ -44,6 +44,7 @@ const AddReport = () => {
 
   const [files, setFiles] = useState([]);
   const [filePreviews, setFilePreviews] = useState([]);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const [success, setSuccess] = useState(false);
   const [fileError, setFileError] = useState('');
@@ -163,6 +164,7 @@ const AddReport = () => {
       setFlagged(false);
       setFiles([]);
       setFilePreviews([]);
+      setAgreedToTerms(false);
     }
   };
 
@@ -266,6 +268,9 @@ const AddReport = () => {
             onChange={(e) => setPostcode(e.target.value)}
             placeholder="e.g. SW1A 1AA"
           />
+          <small style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
+            This will be visible on the public dashboard to show general area trends.
+          </small>
         </div>
 
         <div className={styles.formGroup}>
@@ -277,6 +282,9 @@ const AddReport = () => {
             onChange={(e) => setFlatNumber(e.target.value)}
             placeholder="e.g. Flat 2A, Unit 5"
           />
+          <small style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
+            This remains strictly private and is only used for verified reporting to authorities.
+          </small>
         </div>
 
         <div className={styles.formGroup}>
@@ -288,6 +296,9 @@ const AddReport = () => {
             onChange={(e) => setStreet(e.target.value)}
             placeholder="e.g. 221B Baker Street"
           />
+          <small style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
+            This will be visible on the public dashboard to show general area trends.
+          </small>
         </div>
 
         <div className={styles.formGroup}>
@@ -415,7 +426,22 @@ const AddReport = () => {
           )}
         </div>
 
-        <button className={styles.button} type="submit" disabled={loading}>
+        <div className={styles.formGroup}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              required
+              style={{ marginTop: '0.2rem' }}
+            />
+            <span>
+              I agree to the <a href="/legal" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db' }}>Terms of Use</a> and acknowledge the <a href="/legal" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db' }}>Legal Disclaimer</a>.
+            </span>
+          </label>
+        </div>
+
+        <button className={styles.button} type="submit" disabled={loading || !agreedToTerms}>
           {loading ? 'Submitting...' : 'Submit Report'}
         </button>
 

@@ -2,6 +2,7 @@ import './App.css';
 import Footer from './components/Footer/Footer';
 import AboutPage from './pages/AboutPage';
 import PrivacyPage from './pages/PrivacyPage';
+import LegalPage from './pages/LegalPage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -35,6 +36,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/legal" element={<LegalPage />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>

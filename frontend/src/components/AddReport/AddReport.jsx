@@ -10,6 +10,7 @@ const AddReport = () => {
 	const [description, setDescription] = useState('');
 	const [location, setLocation] = useState('');
 	const [success, setSuccess] = useState(false);
+	const [agreedToTerms, setAgreedToTerms] = useState(false);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -19,6 +20,7 @@ const AddReport = () => {
 			setTitle('');
 			setDescription('');
 			setLocation('');
+			setAgreedToTerms(false);
 			setSuccess(true);
 		}
 	};
@@ -57,8 +59,21 @@ const AddReport = () => {
 								required
 							/>
 						</div>
+						<div className="mb-3 form-check">
+							<input
+								type="checkbox"
+								className="form-check-input"
+								id="agreedToTerms"
+								checked={agreedToTerms}
+								onChange={(e) => setAgreedToTerms(e.target.checked)}
+								required
+							/>
+							<label className="form-check-label" htmlFor="agreedToTerms" style={{ fontSize: '0.85rem' }}>
+								I agree to the <a href="/legal" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db' }}>Terms of Use</a> and acknowledge the <a href="/legal" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db' }}>Legal Disclaimer</a>.
+							</label>
+						</div>
 						{error && <div className="alert alert-danger py-2">{error}</div>}
-						<button type="submit" className="btn btn-primary w-100 mb-2" disabled={loading}>
+						<button type="submit" className="btn btn-primary w-100 mb-2" disabled={loading || !agreedToTerms}>
 							{loading ? 'Submitting...' : 'Submit Report'}
 						</button>
 						{success && <div className="alert alert-success py-2">Report submitted successfully!</div>}

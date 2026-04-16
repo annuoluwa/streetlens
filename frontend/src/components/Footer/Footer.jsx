@@ -9,6 +9,7 @@ const Footer = () => (
       <span className={styles.links}>
         <a href="/about" className={styles.link}>About</a>
         <a href="/privacy" className={styles.link}>Privacy</a>
+        <a href="/legal" className={styles.link}>Legal & Disclaimer</a>
         <a href="/contact" className={styles.link}>Contact</a>
       </span>
     </div>
