@@ -8,6 +8,33 @@ import styles from './AddReport.module.css';
 const toTitleCase = (str) => str.replace(/\b\w/g, c => c.toUpperCase());
 const toSentenceCase = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
 
+const compressImage = (file, maxPx = 1920, quality = 0.85) =>
+  new Promise((resolve) => {
+    if (!file.type.startsWith('image/')) return resolve(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxPx || height > maxPx) {
+          if (width >= height) { height = Math.round((height * maxPx) / width); width = maxPx; }
+          else { width = Math.round((width * maxPx) / height); height = maxPx; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg', lastModified: Date.now() })),
+          'image/jpeg',
+          quality
+        );
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
 const AddReport = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.reports);
@@ -107,14 +134,14 @@ const AddReport = () => {
   };
 
   const uploadEvidenceFiles = async (reportId, evidenceFiles) => {
-    for (const f of evidenceFiles) {
+    await Promise.all(evidenceFiles.map(async (f) => {
+      const compressed = await compressImage(f);
       const evidenceForm = new FormData();
-      evidenceForm.append('file', f);
-
+      evidenceForm.append('file', compressed);
       await api.post(`/reports/${reportId}/evidence`, evidenceForm, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-    }
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -170,26 +197,19 @@ const AddReport = () => {
         const createdReport = resultAction.payload;
         const reportId = createdReport?.id;
 
-        if (reportId) {
-          try {
-            await uploadEvidenceFiles(reportId, files);
-          } catch (uploadErr) {
-            setFileError('Report created, but evidence upload failed.');
-            return;
-          }
-        }
-
         const matched = scanForRights(`${title} ${description}`);
         setMatchedLaws(matched);
 
-        let resolvedEmail = null;
-        if (city && matched.length > 0) {
-          try {
-            const emailRes = await api.get('/council-email', { params: { city } });
-            resolvedEmail = emailRes.data.email || null;
-          } catch {}
-        }
-        setCouncilEmail(resolvedEmail);
+        const [, emailRes] = await Promise.all([
+          reportId
+            ? uploadEvidenceFiles(reportId, files).catch(() => setFileError('Report created, but evidence upload failed.'))
+            : Promise.resolve(),
+          city && matched.length > 0
+            ? api.get('/council-email', { params: { city } }).catch(() => null)
+            : Promise.resolve(null),
+        ]);
+
+        setCouncilEmail(emailRes?.data?.email || null);
         setShowModal(true);
         setSuccess(true);
 
