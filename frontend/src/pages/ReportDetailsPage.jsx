@@ -66,10 +66,10 @@ const ReportDetailsPage = () => {
   const fetchComments = async (page = 1) => {
     try {
       const res = await api.get(`/reports/${id}/comments`, { params: { page, limit: 20 } });
-      setComments(res.data.data);
-      setCommentTotal(res.data.total);
-      setCommentPage(res.data.page);
-      setCommentTotalPages(res.data.totalPages);
+      setComments(res.data.data || []);
+      setCommentTotal(res.data.total || 0);
+      setCommentPage(res.data.page || 1);
+      setCommentTotalPages(res.data.totalPages || 1);
     } catch (err) {
       //  handle error
     }
@@ -104,7 +104,7 @@ const ReportDetailsPage = () => {
   };
 
   // Recursive comment rendering
-  const renderComments = (commentsArr, parentId = null, level = 0) => (
+  const renderComments = (commentsArr = [], parentId = null, level = 0) => (
     <div style={{ marginLeft: level * 24 }}>
       {commentsArr.map(comment => (
         <div key={comment.id} className={styles.commentBox}>
