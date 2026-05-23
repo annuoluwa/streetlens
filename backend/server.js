@@ -6,8 +6,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const logger = require('./logger');
 const rateLimit = require('express-rate-limit');
-// const cookieParser = require('cookie-parser');
-const csurf = require('csurf');
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -23,23 +21,31 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles if needed
-      // Add other directives as necessary
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'", "https://www.google-analytics.com", "https://analytics.google.com"],
     },
   },
   // Allow resources (like images) to be used cross-origin
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 app.use(cookieParser());
-// Rate limiting middleware
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use(limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many attempts, please try again later.' },
+});
 // Set CORS headers for uploads BEFORE static middleware (no duplicates)
 app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
@@ -49,20 +55,8 @@ app.use('/uploads', (req, res, next) => {
 });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// CSRF protection middleware
-// const csrfProtection = csurf({ cookie: true });
-// app.use(csrfProtection);
-
-// Removed CSRF token endpoint since CSRF is disabled
-// app.get('/api/csrf-token', (req, res) => {
-//   res.json({ csrfToken: req.csrfToken() });
-// });
-
-// CSRF protection disabled - app is secured with other measures
-// app.use('/api', (req, res, next) => {
-//   if (req.path === '/csrf-token') return next();
-//   csrfProtection(req, res, next);
-// });
+// CSRF not required: JWT is sent via Authorization header (not cookies),
+// so browsers cannot auto-submit credentials from cross-origin pages.
 
 const authRoutes = require('./routes/authRoutes');
 const commentRoutes = require('./routes/commentRoutes');
@@ -70,13 +64,15 @@ const reportRoutes = require('./routes/reportRoutes');
 const evidenceRoutes = require('./routes/evidenceRoutes');
 const userRoutes = require('./routes/userRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+const rightsRoutes = require('./routes/rightsRoutes');
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api', commentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api', evidenceRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api', contactRoutes);
+app.use('/api', rightsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, env: process.env.NODE_ENV || 'undefined' });

@@ -2,33 +2,39 @@ const pool = require('../db/db');
 const reportModel = require('../models/reportModel');
 const logger = require('../logger');
 
+const { countRecentReports, flagRecentReports } = require('../models/reportModel');
+const { sendAdminFlaggedNotification } = require('../utils/adminNotify');
+
 const createReport = async (req, res) => {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: 'Authentication required to submit a report' });
+  }
+
+  const {
+    title,
+    description,
+    city,
+    postcode,
+    street,
+    property_type,
+    landlord_or_agency,
+    advert_source,
+    flat_number,
+    category,
+    is_anonymous,
+    flagged,
+  } = req.body;
+
+  if (!title || !description) {
+    return res.status(400).json({ message: 'Title and description are required' });
+  }
+
+  const client = await pool.connect();
   try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: 'Authentication required to submit a report' });
-    }
+    await client.query('BEGIN');
 
-    const {
-      title,
-      description,
-      city,
-      postcode,
-      street,
-      property_type,
-      landlord_or_agency,
-      advert_source,
-      flat_number,
-      category,
-      is_anonymous,
-      flagged,
-    } = req.body;
-
-    if (!title || !description) {
-      return res.status(400).json({ message: 'Title and description are required' });
-    }
-
-    const result = await pool.query(
-      `INSERT INTO reports 
+    const result = await client.query(
+      `INSERT INTO reports
         (user_id, title, description, city, postcode, street, flat_number, property_type, landlord_or_agency, advert_source, category, is_anonymous, is_flagged)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
        RETURNING *`,
@@ -51,7 +57,6 @@ const createReport = async (req, res) => {
 
     const report = result.rows[0];
 
-    const { countRecentReports, flagRecentReports } = require('../models/reportModel');
     const count = await countRecentReports({
       postcode: report.postcode,
       street: report.street,
@@ -66,22 +71,26 @@ const createReport = async (req, res) => {
         street: report.street,
         flat_number: report.flat_number
       });
+    }
 
-      const { sendAdminFlaggedNotification } = require('../utils/adminNotify');
-      try {
-        await sendAdminFlaggedNotification({
-          postcode: report.postcode,
-          street: report.street,
-          flat_number: report.flat_number,
-          count
-        });
-      } catch (notifyErr) {}
+    await client.query('COMMIT');
+
+    if (count >= THRESHOLD) {
+      sendAdminFlaggedNotification({
+        postcode: report.postcode,
+        street: report.street,
+        flat_number: report.flat_number,
+        count
+      }).catch(err => logger.error(`Admin notification failed: ${err.message}`));
     }
 
     res.status(201).json(report);
   } catch (error) {
+    await client.query('ROLLBACK');
     logger.error(error);
-     res.status(500).json({ message: 'Failed to create report', error: error.message, stack: error.stack });
+    res.status(500).json({ message: 'Failed to create report' });
+  } finally {
+    client.release();
   }
 };
 
@@ -111,7 +120,7 @@ const deleteReport = async (req, res) => {
     res.status(200).json({ message: 'Report deleted successfully' });
   } catch (error) {
     logger.error(error);
-     res.status(500).json({ message: 'Failed to delete report', error: error.message });
+    res.status(500).json({ message: 'Failed to delete report' });
   }
 };
 

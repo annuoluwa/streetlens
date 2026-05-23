@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middleware/upload');
+const { memoryUpload } = require('../middleware/upload');
 const { protect } = require('../middleware/protect');
 const { saveEvidence } = require('../controllers/evidenceController');
 
@@ -8,7 +8,7 @@ const { saveEvidence } = require('../controllers/evidenceController');
 router.post(
   '/reports/:reportId/evidence',
   protect,
-  upload.single('file'),
+  memoryUpload.single('file'),
   saveEvidence
 );
 

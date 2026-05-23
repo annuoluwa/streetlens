@@ -4,12 +4,27 @@ const fs = require('fs');
 
 const uploadFolder = path.join(__dirname, '../uploads');
 
-// Ensures uploads folder exists
 if (!fs.existsSync(uploadFolder)) {
   fs.mkdirSync(uploadFolder);
 }
 
-const storage = multer.diskStorage({
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'application/pdf',
+];
+
+const fileFilter = (req, file, cb) => {
+  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`File type "${file.mimetype}" is not allowed. Accepted: images and PDF.`), false);
+  }
+};
+
+const diskStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadFolder);
   },
@@ -20,6 +35,10 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: multer.memoryStorage() });
+// For routes that save files locally
+const upload = multer({ storage: diskStorage, fileFilter, limits: { fileSize: 10 * 1024 * 1024 } });
 
-module.exports = upload;
+// For routes that stream files directly to Cloudinary (needs buffer in memory)
+const memoryUpload = multer({ storage: multer.memoryStorage(), fileFilter, limits: { fileSize: 10 * 1024 * 1024 } });
+
+module.exports = { upload, memoryUpload };

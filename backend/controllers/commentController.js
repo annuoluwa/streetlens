@@ -31,10 +31,20 @@ const createReportComment = async (req, res) => {
 const getReportComments = async (req, res) => {
   try {
     const { reportId } = req.params;
-    const comments = await getCommentsByReportId(reportId);
-    res.json(comments);
-  } catch (error) {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+    const offset = (page - 1) * limit;
 
+    const { total, comments } = await getCommentsByReportId(reportId, { limit, offset });
+
+    res.json({
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      data: comments
+    });
+  } catch (error) {
     res.status(500).json({ message: 'Failed to fetch comments' });
   }
 };

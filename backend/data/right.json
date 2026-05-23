@@ -1,0 +1,136 @@
+{
+  "jurisdiction": "UK (England)",
+  "governing_legislation": "Renters' Rights Act 2025/2026",
+  "framework_version": "1.2_Full_Rollout",
+  "last_updated": "2026-05",
+  "laws": [
+    {
+      "id": "RRA_01_ILLEGAL_EVICTION",
+      "category": "Abolition of Section 21 & Notice Violations",
+      "triggerWords": [
+        "evict", "no notice", "lockout", "locks changed", "thrown out", 
+        "section 21", "no fault", "break clause", "leaving date", "get out"
+      ],
+      "threshold_condition": "Any eviction attempt without a formal court-ordered Section 8 notice, any attempt to execute a Section 21 'no fault' process (fully abolished as of 1 May 2026), or failure to grant a mandatory 4-month notice if a landlord claims they are selling or moving in.",
+      "feedback": "Your landlord may be committing a criminal offense. Under the Renters' Rights Act, all private tenancies have transitioned to rolling 'assured periodic tenancies'. Section 21 has been completely abolished. Landlords can no longer evict you without a valid, legally proven reason (such as moving in or selling the property), and these grounds now require a minimum of 4 months' notice and cannot be used during the first 12 months of your tenancy.",
+      "emergencyAction": {
+        "entity": "Local Authority Housing Enforcement Team & Shelter UK",
+        "email": "housingenforcement@yourlocalcouncil.gov.uk",
+        "helpline": "0808 800 4444",
+        "instructions": "Contact your council's tenancy relations or housing enforcement team. If your landlord is actively trying to force you out or change locks without a court bailiff, call the police on 101."
+      }
+    },
+    {
+      "id": "RRA_02_RENT_INCREMENTS",
+      "category": "Unfair Rent Increases & Section 13 Hikes",
+      "triggerWords": [
+        "rent increase", "rent hike", "double rent", "tribunal", 
+        "rent review clause", "more rent", "pay extra"
+      ],
+      "threshold_condition": "Attempting to increase rent more than once in a 12-month period, attempting to bypass the formal Section 13 notice procedure, or enforcing an old 'rent review clause' which are legally invalid as of May 2026.",
+      "feedback": "This rent increase may be invalid. Landlords are strictly limited to raising rent once per year. They must issue a formal Section 13 notice giving you at least 2 months' notice. Rent review clauses inside contracts are now entirely illegal. If the proposed amount is above local open-market rates, you have the right to challenge it immediately via the First-tier Tribunal.",
+      "emergencyAction": {
+        "entity": "First-tier Tribunal (Property Chamber) / Citizens Advice",
+        "email": "advice@citizensadvice.org.uk",
+        "helpline": "0800 144 8848",
+        "instructions": "Do not sign or agree to the increase. File a dispute with the First-tier Tribunal before the date the new rent is supposed to start to freeze the increase while it is reviewed."
+      }
+    },
+    {
+      "id": "RRA_03_RENTAL_BIDDING",
+      "category": "Banned Rental Bidding Wars",
+      "triggerWords": [
+        "bidding", "offer more", "highest bidder", "gazump", 
+        "bidding war", "above advertised", "premium price"
+      ],
+      "threshold_condition": "A landlord or letting agent inviting, encouraging, or accepting rental financial offers higher than the originally advertised list price.",
+      "feedback": "The practice of 'rental bidding wars' is strictly illegal under the new Act. Landlords and letting agents are required by law to publish a fixed asking rent and are explicitly prohibited from accepting or soliciting any offers above that stated amount.",
+      "emergencyAction": {
+        "entity": "Local Trading Standards / Council Housing Team",
+        "email": "tradingstandards@yourlocalcouncil.gov.uk",
+        "helpline": "Contact Local Council",
+        "instructions": "Save screenshots of the original property listing and any text messages or emails from the agent/landlord asking for higher offers. Submit these directly to Trading Standards."
+      }
+    },
+    {
+      "id": "RRA_04_UPFRONT_COSTS",
+      "category": "Excessive Rent in Advance Restrictions",
+      "triggerWords": [
+        "months upfront", "6 months rent", "advance payment", 
+        "holding fee", "upfront deposit"
+      ],
+      "threshold_condition": "Requesting or accepting more than a strict maximum cap of 1 month's rent in advance.",
+      "feedback": "Your landlord or agent is breaching cash-cap rules. To prevent discrimination against low-income renters or those without traditional UK guarantors, the law restricts landlords from asking for massive sums upfront. They cannot ask for or accept more than 1 month's rent in advance.",
+      "emergencyAction": {
+        "entity": "Local Council Housing Options",
+        "email": "privatehousing@yourlocalcouncil.gov.uk",
+        "helpline": "Contact Local Council",
+        "instructions": "Inform the agent in writing that demanding more than 1 month's rent in advance is subject to local authority fines. Report instances to the council's private renting team."
+      }
+    },
+    {
+      "id": "RRA_05_DISCRIMINATION",
+      "category": "Blanket Bans on Benefits or Children",
+      "triggerWords": [
+        "no dss", "housing benefit", "no kids", "no children", 
+        "universal credit", "working professionals only"
+      ],
+      "threshold_condition": "Refusing to rent a property, or applying discriminatory vetting criteria, simply because an applicant receives welfare benefits or has children.",
+      "feedback": "This is illegal discrimination. The Renters' Rights Act explicitly bans blanket policies that exclude families with children or individuals who receive Universal Credit or Housing Benefit. Landlords must assess your financial suitability individually, rather than using generic exclusions.",
+      "emergencyAction": {
+        "entity": "Equality Advisory Support Service (EASS) / Shelter",
+        "email": "advice@equalityadvisoryservice.com",
+        "helpline": "0808 800 0082",
+        "instructions": "Keep copies of any written text or listing descriptions that use terms like 'No DSS' or 'Professional Couples Only (No Children)'. Forward these to EASS for assistance in challenging the agent."
+      }
+    },
+    {
+      "id": "RRA_06_PET_RIGHTS",
+      "category": "Right to Request Pets",
+      "triggerWords": [
+        "no pets", "dog banned", "cat banned", "refused pet", 
+        "pet request", "allowed a pet"
+      ],
+      "threshold_condition": "A landlord issuing a blanket ban or unreasonably refusing a tenant's formal written request to keep a domestic pet.",
+      "feedback": "You now have a statutory right to request a pet. Under the current law, landlords cannot blanket-ban animals and cannot unreasonably refuse a request. They must respond to your written request within a set timeframe. They can, however, require you to maintain insurance against pet damage.",
+      "emergencyAction": {
+        "entity": "Citizens Advice / Property Ombudsman",
+        "email": "advice@citizensadvice.org.uk",
+        "helpline": "0800 144 8848",
+        "instructions": "Submit your pet request to your landlord in writing. If they refuse without providing a reasonable justification (e.g., building block headlease bans), you can flag this behavior for a formal dispute resolution."
+      }
+    },
+    {
+      "id": "RRA_07_HARASSMENT",
+      "category": "Landlord Harassment & Privacy Breaches",
+      "triggerWords": [
+        "barged in", "no warning", "harassing", "turned off gas", 
+        "turned off electricity", "cut water", "showing up", "unannounced"
+      ],
+      "threshold_condition": "Entering the rental property without a minimum of 24 hours' prior written notice, or tampering with supply lines for essential utility services.",
+      "feedback": "This is a violation of your right to 'quiet enjoyment'. Legally, a landlord must provide at least 24 hours' written notice before turning up for inspections or repairs, except in critical emergencies. Cutting off water, gas, or power lines constitutes a serious form of harassment and constructive eviction.",
+      "emergencyAction": {
+        "entity": "Council Environmental Health & Police Non-Emergency",
+        "email": "environmentalhealth@yourlocalcouncil.gov.uk",
+        "helpline": "101",
+        "instructions": "Log the dates and times of all unannounced visits or utility interferences. Report utility cuts directly to Environmental Health instantly. Use 101 if you feel unsafe inside your unit."
+      }
+    },
+    {
+      "id": "RRA_08_STANDARDS",
+      "category": "Decent Homes Standard & Health Hazards",
+      "triggerWords": [
+        "mould", "damp", "broken boiler", "no heating", 
+        "leaking roof", "rats", "infestation", "unsafe"
+      ],
+      "threshold_condition": "Failure to maintain the property according to the Decent Homes Standard or ignoring life-safety hazards.",
+      "feedback": "Your living conditions are likely in breach of the Decent Homes Standard, which now legally covers private rentals. Landlords are bound by strict statutory timelines to clear out category 1 hazards like toxic black mould, structural faults, or broken central heating systems.",
+      "emergencyAction": {
+        "entity": "Local Authority Private Housing Standards Team",
+        "email": "privatehousing@yourlocalcouncil.gov.uk",
+        "helpline": "Contact Local Council",
+        "instructions": "Document the issues thoroughly with photographs. Notify your landlord in writing. If no remediation begins within 14 days, upload your documents directly to your local council's private housing team."
+      }
+    }
+  ]
+}

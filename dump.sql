@@ -194,7 +194,7 @@ CREATE TABLE public.reports (
     is_anonymous boolean DEFAULT true,
     created_at timestamp without time zone DEFAULT now(),
     is_flagged boolean DEFAULT false,
-    flat_number character varying(50) NOT NULL,
+    flat_number character varying(50),
     admin_flagged boolean DEFAULT false,
     admin_verified boolean DEFAULT false,
     last_escalated_at timestamp without time zone

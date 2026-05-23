@@ -1,7 +1,7 @@
 
 const express = require('express');
 const { protect } = require('../middleware/protect');
-const upload = require('../middleware/upload');
+const { upload } = require('../middleware/upload');
 const { createReport, getReports, getReportById, deleteReport, verifyReport } = require('../controllers/reportController');
 const router = express.Router();
 

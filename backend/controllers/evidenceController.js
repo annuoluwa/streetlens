@@ -1,5 +1,6 @@
 const pool = require('../db/db');
 const cloudinary = require('../config/cloudinary');
+const logger = require('../logger');
 
 const uploadBufferToCloudinary = (buffer, folder) =>
   new Promise((resolve, reject) => {
@@ -39,8 +40,8 @@ const saveEvidence = async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Evidence upload failed:', error);
-    res.status(500).json({ message: 'Failed to upload evidence', error: error.message });
+    logger.error(`Evidence upload failed: ${error.message}`);
+    res.status(500).json({ message: 'Failed to upload evidence' });
   }
 };
 
