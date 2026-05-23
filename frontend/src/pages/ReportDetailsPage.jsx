@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../utils/api';
@@ -7,6 +7,14 @@ import { deleteReport as deleteReportApi } from '../utils/deleteReport';
 import styles from './ReportDetailsPage.module.css';
 import LogoSpinner from '../components/Spinner/LogoSpinner';
 import { resolveEvidenceImageUrl, CLOUDINARY_TRANSFORMS } from '../utils/getImageUrl';
+
+const toTitleCase = (str) => str.replace(/\b\w/g, c => c.toUpperCase());
+const toSentenceCase = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+
+const CATEGORIES = [
+  'Health Hazard', 'Security Hazard', 'Fire Hazard', 'Structural Hazard', 'Environmental Hazard',
+  'Well Maintained Property', 'Responsive Landlord', 'Fair Rent', 'Safe and Secure', 'Good Condition',
+];
 
 const ReportDetailsPage = () => {
   const { id } = useParams();
@@ -17,6 +25,10 @@ const ReportDetailsPage = () => {
   const [error, setError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [saveError, setSaveError] = useState(null);
   // Only allow delete if user is the report owner
   // Fallback: if report.user_id is missing, allow delete if user.id === report.id (for debugging)
   const canDelete = user && report && (report.user_id ? user.id === report.user_id : user.id === report.id);
@@ -37,6 +49,41 @@ const ReportDetailsPage = () => {
 
 
 
+
+  const handleEditStart = useCallback(() => {
+    setEditData({
+      title: report.title || '',
+      description: report.description || '',
+      city: report.city || '',
+      postcode: report.postcode || '',
+      street: report.street || '',
+      flat_number: report.flat_number || '',
+      property_type: report.property_type || '',
+      landlord_or_agency: report.landlord_or_agency || '',
+      advert_source: report.advert_source || '',
+      category: report.category || '',
+      is_anonymous: report.is_anonymous,
+    });
+    setEditing(true);
+    setSaveError(null);
+  }, [report]);
+
+  const handleSave = async () => {
+    setSaveLoading(true);
+    setSaveError(null);
+    try {
+      const res = await api.patch(`/reports/${id}`, editData);
+      setReport(prev => ({ ...prev, ...res.data }));
+      setEditing(false);
+    } catch (err) {
+      setSaveError(err?.response?.data?.message || 'Failed to save changes');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const setField = (field, transform = v => v) => (e) =>
+    setEditData(prev => ({ ...prev, [field]: transform(e.target.value) }));
 
   const [currentImage, setCurrentImage] = useState(0);
   const [comments, setComments] = useState([]);
@@ -178,21 +225,33 @@ const ReportDetailsPage = () => {
               </svg>
             </span>
           )}
-          <h2 className="mb-2">{report.title}</h2>
+          {editing ? (
+            <input
+              className="form-control form-control-lg mb-2"
+              value={editData.title}
+              onChange={setField('title', toSentenceCase)}
+              placeholder="Title"
+            />
+          ) : (
+            <h2 className="mb-2">{report.title}</h2>
+          )}
           <div className="d-flex flex-wrap gap-3 small text-muted mb-2">
-            <span><strong>Location:</strong> {report.city || report.location}</span>
+            <span><strong>Location:</strong> {editing ? editData.city : (report.city || report.location)}</span>
             <span><strong>Date:</strong> {report.created_at ? new Date(report.created_at).toLocaleString() : 'N/A'}</span>
           </div>
         </div>
         {canDelete && (
-          <div className="d-flex justify-content-end mb-2">
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={handleDelete}
-              disabled={deleteLoading}
-            >
-              {deleteLoading ? 'Deleting...' : 'Delete'}
-            </button>
+          <div className="d-flex justify-content-end gap-2 mb-2">
+            {!editing && (
+              <button className="btn btn-outline-primary btn-sm" onClick={handleEditStart}>
+                Edit
+              </button>
+            )}
+            {!editing && (
+              <button className="btn btn-danger btn-sm" onClick={handleDelete} disabled={deleteLoading}>
+                {deleteLoading ? 'Deleting...' : 'Delete'}
+              </button>
+            )}
           </div>
         )}
         {deleteError && <div className="alert alert-danger py-2 mb-2">{deleteError}</div>}
@@ -209,16 +268,94 @@ const ReportDetailsPage = () => {
             <div className="ms-2 small text-muted">{currentImage + 1} / {images.length}</div>
           </div>
         )}
-        <div className="mb-3">{report.description}</div>
-        <div className="row g-2 mb-3">
-          <div className="col-6 col-md-4"><strong>Postcode:</strong> {report.postcode || 'N/A'}</div>
-          <div className="col-6 col-md-4"><strong>Street:</strong> {report.street || 'N/A'}</div>
-          <div className="col-6 col-md-4"><strong>Property Type:</strong> {report.property_type || 'N/A'}</div>
-          <div className="col-6 col-md-4"><strong>Landlord/Agency:</strong> {report.landlord_or_agency || 'N/A'}</div>
-          <div className="col-6 col-md-4"><strong>Advert Source:</strong> {report.advert_source || 'N/A'}</div>
-          <div className="col-6 col-md-4"><strong>Category:</strong> {report.category || 'N/A'}</div>
-          <div className="col-6 col-md-4"><strong>Anonymous:</strong> {report.is_anonymous ? 'Yes' : 'No'}</div>
-        </div>
+        {editing ? (
+          <>
+            <div className="mb-3">
+              <label className="form-label small text-muted">Description</label>
+              <textarea
+                className="form-control mb-2"
+                rows={4}
+                value={editData.description}
+                onChange={setField('description', toSentenceCase)}
+              />
+            </div>
+            <div className="row g-2 mb-3">
+              <div className="col-6 col-md-4">
+                <label className="form-label small text-muted">City</label>
+                <input className="form-control form-control-sm" value={editData.city} onChange={setField('city', toTitleCase)} />
+              </div>
+              <div className="col-6 col-md-4">
+                <label className="form-label small text-muted">Postcode</label>
+                <input className="form-control form-control-sm" value={editData.postcode} onChange={setField('postcode', v => v.toUpperCase())} />
+              </div>
+              <div className="col-6 col-md-4">
+                <label className="form-label small text-muted">Street</label>
+                <input className="form-control form-control-sm" value={editData.street} onChange={setField('street', toTitleCase)} />
+              </div>
+              <div className="col-6 col-md-4">
+                <label className="form-label small text-muted">Flat/Unit Number</label>
+                <input className="form-control form-control-sm" value={editData.flat_number} onChange={setField('flat_number', toTitleCase)} />
+              </div>
+              <div className="col-6 col-md-4">
+                <label className="form-label small text-muted">Property Type</label>
+                <input className="form-control form-control-sm" value={editData.property_type} onChange={setField('property_type', toTitleCase)} />
+              </div>
+              <div className="col-6 col-md-4">
+                <label className="form-label small text-muted">Landlord/Agency</label>
+                <input className="form-control form-control-sm" value={editData.landlord_or_agency} onChange={setField('landlord_or_agency', toTitleCase)} />
+              </div>
+              <div className="col-6 col-md-4">
+                <label className="form-label small text-muted">Advert Source</label>
+                <input className="form-control form-control-sm" value={editData.advert_source} onChange={setField('advert_source', toTitleCase)} />
+              </div>
+              <div className="col-6 col-md-4">
+                <label className="form-label small text-muted">Category</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={editData.category}
+                  onChange={setField('category')}
+                >
+                  <option value="">Select category</option>
+                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="col-6 col-md-4 d-flex align-items-end">
+                <div className="form-check mb-1">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="editAnon"
+                    checked={editData.is_anonymous}
+                    onChange={e => setEditData(prev => ({ ...prev, is_anonymous: e.target.checked }))}
+                  />
+                  <label className="form-check-label small" htmlFor="editAnon">Anonymous</label>
+                </div>
+              </div>
+            </div>
+            {saveError && <div className="alert alert-danger py-2 mb-2">{saveError}</div>}
+            <div className="d-flex gap-2 mb-2">
+              <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={saveLoading}>
+                {saveLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+              <button className="btn btn-outline-secondary btn-sm" onClick={() => setEditing(false)} disabled={saveLoading}>
+                Cancel
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mb-3">{report.description}</div>
+            <div className="row g-2 mb-3">
+              <div className="col-6 col-md-4"><strong>Postcode:</strong> {report.postcode || 'N/A'}</div>
+              <div className="col-6 col-md-4"><strong>Street:</strong> {report.street || 'N/A'}</div>
+              <div className="col-6 col-md-4"><strong>Property Type:</strong> {report.property_type || 'N/A'}</div>
+              <div className="col-6 col-md-4"><strong>Landlord/Agency:</strong> {report.landlord_or_agency || 'N/A'}</div>
+              <div className="col-6 col-md-4"><strong>Advert Source:</strong> {report.advert_source || 'N/A'}</div>
+              <div className="col-6 col-md-4"><strong>Category:</strong> {report.category || 'N/A'}</div>
+              <div className="col-6 col-md-4"><strong>Anonymous:</strong> {report.is_anonymous ? 'Yes' : 'No'}</div>
+            </div>
+          </>
+        )}
       </div>
       {/* Comments Section */}
       <div className="card shadow p-4">

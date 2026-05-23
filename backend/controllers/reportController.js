@@ -94,6 +94,49 @@ const createReport = async (req, res) => {
   }
 };
 
+const updateReport = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    const { id } = req.params;
+    const {
+      title, description, city, postcode, street, flat_number,
+      property_type, landlord_or_agency, advert_source, category, is_anonymous,
+    } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({ message: 'Title and description are required' });
+    }
+
+    const result = await pool.query(
+      `UPDATE reports SET
+        title = $1, description = $2, city = $3, postcode = $4, street = $5,
+        flat_number = $6, property_type = $7, landlord_or_agency = $8,
+        advert_source = $9, category = $10, is_anonymous = $11
+       WHERE id = $12 AND user_id = $13
+       RETURNING *`,
+      [
+        title, description, city || null, postcode || null, street || null,
+        flat_number || null, property_type || null, landlord_or_agency || null,
+        advert_source || null, category || null,
+        is_anonymous === true || is_anonymous === 'true',
+        id, req.user.id,
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Report not found or permission denied' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'Failed to update report' });
+  }
+};
+
 const deleteReport = async (req, res) => {
   try {
     if (!req.user || !req.user.id) {
@@ -257,6 +300,7 @@ const verifyReport = async (req, res) => {
 
 module.exports = {
   createReport,
+  updateReport,
   getReports,
   getReportById,
   deleteReport,

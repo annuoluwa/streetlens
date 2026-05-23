@@ -2,7 +2,7 @@
 const express = require('express');
 const { protect } = require('../middleware/protect');
 const { upload } = require('../middleware/upload');
-const { createReport, getReports, getReportById, deleteReport, verifyReport } = require('../controllers/reportController');
+const { createReport, updateReport, getReports, getReportById, deleteReport, verifyReport } = require('../controllers/reportController');
 const router = express.Router();
 
 
@@ -14,6 +14,9 @@ router.get('/:id', getReportById);
 
 // Create a new report (authenticated, with multiple file upload)
 router.post('/', protect, upload.array('evidence', 10), createReport);
+
+// Edit a report (authenticated, only owner)
+router.patch('/:id', protect, updateReport);
 
 // Delete a report by ID (authenticated, only owner or admin)
 router.delete('/:id', protect, deleteReport);
