@@ -24,7 +24,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
       scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      connectSrc: ["'self'", "https://www.google-analytics.com", "https://analytics.google.com"],
+      connectSrc: ["'self'", "https://*.google-analytics.com", "https://*.analytics.google.com"],
     },
   },
   // Allow resources (like images) to be used cross-origin
