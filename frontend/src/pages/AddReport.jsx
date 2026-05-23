@@ -10,7 +10,6 @@ const toSentenceCase = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1)
 
 const compressImage = (file, maxPx = 1920, quality = 0.85) =>
   new Promise((resolve) => {
-    if (!file.type.startsWith('image/')) return resolve(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
@@ -479,7 +478,7 @@ const AddReport = () => {
           <input
             className={styles.input}
             type="file"
-            accept="image/*,application/pdf"
+            accept="image/*"
             multiple
             onChange={handleFileChange}
             required

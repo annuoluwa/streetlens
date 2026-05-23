@@ -13,14 +13,13 @@ const ALLOWED_MIME_TYPES = [
   'image/png',
   'image/gif',
   'image/webp',
-  'application/pdf',
 ];
 
 const fileFilter = (req, file, cb) => {
   if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error(`File type "${file.mimetype}" is not allowed. Accepted: images and PDF.`), false);
+    cb(new Error(`File type "${file.mimetype}" is not allowed. Images only.`), false);
   }
 };
 
