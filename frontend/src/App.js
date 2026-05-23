@@ -17,6 +17,8 @@ import ReportDetailsPage from './pages/ReportDetailsPage';
 import AdminDashboard from './pages/AdminDashboard';
 import ProfilePage from './pages/ProfilePage';
 import Contact from './pages/Contact';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/legal" element={<LegalPage />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
       </div>
       <Footer />

@@ -1,5 +1,6 @@
 const pool = require('../db/db');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const createUser = async (username, email, hashedPassword, role = 'user') => {
     const query = 'INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role';
@@ -52,11 +53,39 @@ const updateUserPassword = async (id, hashedPassword) => {
     return result.rows[0];
 };
 
+const setResetToken = async (email) => {
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const result = await pool.query(
+        'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3 RETURNING id',
+        [token, expires, email]
+    );
+    return result.rowCount > 0 ? token : null;
+};
+
+const findUserByResetToken = async (token) => {
+    const result = await pool.query(
+        'SELECT * FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
+        [token]
+    );
+    return result.rows[0];
+};
+
+const clearResetToken = async (userId) => {
+    await pool.query(
+        'UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = $1',
+        [userId]
+    );
+};
+
 module.exports = {
     createUser,
     findUserByEmail,
     findUserById,
     registerUser,
     deleteUserById,
-    updateUserPassword
+    updateUserPassword,
+    setResetToken,
+    findUserByResetToken,
+    clearResetToken,
 };

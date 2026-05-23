@@ -94,6 +94,9 @@ const Login = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
           {success && <div className="alert alert-success py-2">Login successful! Redirecting...</div>}
+          <div className="text-center mt-1">
+            <Link to="/forgot-password" className="text-muted" style={{ fontSize: '0.85rem' }}>Forgot password?</Link>
+          </div>
           <div className="text-center mt-2">
             <span>Don't have an account? </span>
             <Link to="/register">Register</Link>

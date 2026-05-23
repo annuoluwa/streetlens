@@ -1,6 +1,8 @@
-const bcrypt = require ('bcrypt');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { createUser, findUserByEmail, findUserById, updateUserPassword } = require('../models/userModel');
+const { createUser, findUserByEmail, findUserById, updateUserPassword, setResetToken, findUserByResetToken, clearResetToken } = require('../models/userModel');
+const sendMail = require('../utils/mailer');
+const logger = require('../logger');
 
 
 const register = async (req, res) => {
@@ -87,8 +89,65 @@ const resetPassword = async (req, res) => {
 };
 
 
-    module.exports ={
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ message: 'Email is required.' });
+
+        const token = await setResetToken(email);
+
+        if (token) {
+            const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+            try {
+                await sendMail({
+                    from: process.env.CONTACT_EMAIL || process.env.MAILTRAP_USER,
+                    to: email,
+                    subject: 'StreetLens — Reset your password',
+                    text: `You requested a password reset.\n\nClick the link below to set a new password (valid for 1 hour):\n\n${resetUrl}\n\nIf you did not request this, you can safely ignore this email.`,
+                    html: `<p>You requested a password reset.</p><p><a href="${resetUrl}">Reset your password</a></p><p>This link expires in 1 hour. If you did not request this, ignore this email.</p>`,
+                });
+            } catch (mailErr) {
+                logger.error(`Forgot-password email failed: ${mailErr.message}`);
+            }
+        }
+
+        // Always return the same message to prevent email enumeration
+        res.json({ message: 'If that email is registered, a reset link has been sent.' });
+    } catch (err) {
+        logger.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const resetPasswordByToken = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { newPassword } = req.body;
+
+        if (!newPassword || newPassword.length < 8) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+        }
+
+        const user = await findUserByResetToken(token);
+        if (!user) {
+            return res.status(400).json({ message: 'Reset link is invalid or has expired.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await updateUserPassword(user.id, hashedPassword);
+        await clearResetToken(user.id);
+
+        res.json({ message: 'Password reset successfully. You can now log in.' });
+    } catch (err) {
+        logger.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = {
     register,
     login,
-    resetPassword
-    };
+    resetPassword,
+    forgotPassword,
+    resetPasswordByToken,
+};

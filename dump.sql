@@ -235,7 +235,9 @@ CREATE TABLE public.users (
     email character varying(255) NOT NULL,
     password_hash text NOT NULL,
     created_at timestamp without time zone DEFAULT now(),
-    role character varying(20) DEFAULT 'user'::character varying
+    role character varying(20) DEFAULT 'user'::character varying,
+    reset_token character varying(64),
+    reset_token_expires timestamp without time zone
 );
 
 
