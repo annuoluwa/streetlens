@@ -5,6 +5,9 @@ import api from '../utils/api';
 import { addReport } from '../report/reportSlice';
 import styles from './AddReport.module.css';
 
+const toTitleCase = (str) => str.replace(/\b\w/g, c => c.toUpperCase());
+const toSentenceCase = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+
 const AddReport = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.reports);
@@ -74,6 +77,7 @@ const AddReport = () => {
     );
   };
 
+  const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [fileError, setFileError] = useState('');
   const [titleError, setTitleError] = useState('');
@@ -142,6 +146,8 @@ const AddReport = () => {
     }
     if (!valid) return;
 
+    setSubmitting(true);
+
     const reportPayload = {
       title,
       description,
@@ -157,51 +163,55 @@ const AddReport = () => {
       flagged: String(flagged),
     };
 
-    const resultAction = await dispatch(addReport(reportPayload));
+    try {
+      const resultAction = await dispatch(addReport(reportPayload));
 
-    if (addReport.fulfilled.match(resultAction)) {
-      const createdReport = resultAction.payload;
-      const reportId = createdReport?.id;
+      if (addReport.fulfilled.match(resultAction)) {
+        const createdReport = resultAction.payload;
+        const reportId = createdReport?.id;
 
-      if (reportId) {
-        try {
-          await uploadEvidenceFiles(reportId, files);
-        } catch (uploadErr) {
-          setFileError('Report created, but evidence upload failed.');
-          return;
+        if (reportId) {
+          try {
+            await uploadEvidenceFiles(reportId, files);
+          } catch (uploadErr) {
+            setFileError('Report created, but evidence upload failed.');
+            return;
+          }
         }
+
+        const matched = scanForRights(`${title} ${description}`);
+        setMatchedLaws(matched);
+
+        let resolvedEmail = null;
+        if (city && matched.length > 0) {
+          try {
+            const emailRes = await api.get('/council-email', { params: { city } });
+            resolvedEmail = emailRes.data.email || null;
+          } catch {}
+        }
+        setCouncilEmail(resolvedEmail);
+        setShowModal(true);
+        setSuccess(true);
+
+        setTitle('');
+        setDescription('');
+        setCity('');
+        setPostcode('');
+        setStreet('');
+        setFlatNumber('');
+        setPropertyType('');
+        setLandlordOrAgency('');
+        setAdvertSource('');
+        setCategory('');
+        setCustomCategory('');
+        setIsAnonymous(true);
+        setFlagged(false);
+        setFiles([]);
+        setFilePreviews([]);
+        setAgreedToTerms(false);
       }
-
-      const matched = scanForRights(`${title} ${description}`);
-      setMatchedLaws(matched);
-
-      let resolvedEmail = null;
-      if (city && matched.length > 0) {
-        try {
-          const emailRes = await api.get('/council-email', { params: { city } });
-          resolvedEmail = emailRes.data.email || null;
-        } catch {}
-      }
-      setCouncilEmail(resolvedEmail);
-      setShowModal(true);
-      setSuccess(true);
-
-      setTitle('');
-      setDescription('');
-      setCity('');
-      setPostcode('');
-      setStreet('');
-      setFlatNumber('');
-      setPropertyType('');
-      setLandlordOrAgency('');
-      setAdvertSource('');
-      setCategory('');
-      setCustomCategory('');
-      setIsAnonymous(true);
-      setFlagged(false);
-      setFiles([]);
-      setFilePreviews([]);
-      setAgreedToTerms(false);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -223,7 +233,10 @@ const AddReport = () => {
     <div className={styles.addReportContainer}>
       <div className={styles.header}>Submit a Report</div>
 
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ opacity: submitting ? 0.4 : 1, pointerEvents: submitting ? 'none' : 'auto', transition: 'opacity 0.4s ease' }}
+      >
         <div className={styles.formGroup}>
           <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>
             Flagged as:
@@ -260,7 +273,7 @@ const AddReport = () => {
             className={styles.input}
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => setTitle(toSentenceCase(e.target.value))}
             required
             placeholder="e.g. Mould in bedroom, broken heating, etc."
           />
@@ -274,7 +287,7 @@ const AddReport = () => {
           <textarea
             className={styles.textarea}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => setDescription(toSentenceCase(e.target.value))}
             required
             placeholder="Describe the issue, location, and any relevant details."
           />
@@ -289,7 +302,7 @@ const AddReport = () => {
             className={styles.input}
             type="text"
             value={city}
-            onChange={(e) => setCity(e.target.value)}
+            onChange={(e) => setCity(toTitleCase(e.target.value))}
             required
             placeholder="e.g. London, Manchester"
           />
@@ -302,7 +315,7 @@ const AddReport = () => {
             className={styles.input}
             type="text"
             value={postcode}
-            onChange={(e) => setPostcode(e.target.value)}
+            onChange={(e) => setPostcode(e.target.value.toUpperCase())}
             placeholder="e.g. SW1A 1AA"
           />
           <small style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
@@ -316,7 +329,7 @@ const AddReport = () => {
             className={styles.input}
             type="text"
             value={flatNumber}
-            onChange={(e) => setFlatNumber(e.target.value)}
+            onChange={(e) => setFlatNumber(toTitleCase(e.target.value))}
             placeholder="e.g. Flat 2A, Unit 5"
           />
           <small style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
@@ -330,7 +343,7 @@ const AddReport = () => {
             className={styles.input}
             type="text"
             value={street}
-            onChange={(e) => setStreet(e.target.value)}
+            onChange={(e) => setStreet(toTitleCase(e.target.value))}
             placeholder="e.g. 221B Baker Street"
           />
           <small style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
@@ -344,7 +357,7 @@ const AddReport = () => {
             className={styles.input}
             type="text"
             value={propertyType}
-            onChange={(e) => setPropertyType(e.target.value)}
+            onChange={(e) => setPropertyType(toTitleCase(e.target.value))}
             placeholder="e.g. Flat, House, Studio"
           />
         </div>
@@ -355,7 +368,7 @@ const AddReport = () => {
             className={styles.input}
             type="text"
             value={landlordOrAgency}
-            onChange={(e) => setLandlordOrAgency(e.target.value)}
+            onChange={(e) => setLandlordOrAgency(toTitleCase(e.target.value))}
             placeholder="e.g. John Smith, Acme Lettings"
           />
         </div>
@@ -366,7 +379,7 @@ const AddReport = () => {
             className={styles.input}
             type="text"
             value={advertSource}
-            onChange={(e) => setAdvertSource(e.target.value)}
+            onChange={(e) => setAdvertSource(toTitleCase(e.target.value))}
             placeholder="e.g. Rightmove, Gumtree, Facebook"
           />
         </div>
