@@ -64,9 +64,7 @@ const HomeFeed = () => {
 													<span><strong>Date:</strong> {
 														report.created_at
 															? new Date(report.created_at).toLocaleString()
-															: report.createdAt
-																? new Date(report.createdAt).toLocaleString()
-																: 'N/A'
+															: 'N/A'
 													}</span>
 												</div>
 											</div>

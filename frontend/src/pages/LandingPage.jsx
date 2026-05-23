@@ -20,10 +20,8 @@ const normalizeCity = (report) => {
 };
 
 const getCreatedTimestamp = (report) => {
-  const rawDate = report.created_at || report.createdAt;
-  if (!rawDate) return 0;
-
-  const timestamp = new Date(rawDate).getTime();
+  if (!report.created_at) return 0;
+  const timestamp = new Date(report.created_at).getTime();
   return Number.isNaN(timestamp) ? 0 : timestamp;
 };
 
@@ -40,7 +38,7 @@ const TESTIMONIALS = [
 
 const LandingPage = () => {
   const dispatch = useDispatch();
-  const { reports, loading, error } = useSelector((state) => state.reports);
+  const { reports, total, loading, error } = useSelector((state) => state.reports);
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
   useEffect(() => {
@@ -49,21 +47,19 @@ const LandingPage = () => {
 
   const reportList = useMemo(() => (Array.isArray(reports) ? reports : []), [reports]);
 
-  const stats = useMemo(() => {
-    const citySet = new Set();
-
+  const totalCities = useMemo(() => {
+    const set = new Set();
     reportList.forEach((report) => {
       const normalizedCity = normalizeCity(report);
-      if (normalizedCity) {
-        citySet.add(normalizedCity);
-      }
+      if (normalizedCity) set.add(normalizedCity);
     });
-
-    return {
-      totalReports: reportList.length,
-      totalCities: citySet.size
-    };
+    return set.size;
   }, [reportList]);
+
+  const stats = useMemo(() => ({
+    totalReports: total,
+    totalCities: totalCities
+  }), [total, totalCities]);
 
   const recentReports = useMemo(() => {
     return [...reportList]

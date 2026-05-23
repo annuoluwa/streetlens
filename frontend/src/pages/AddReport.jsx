@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { addReport } from '../report/reportSlice';
 import styles from './AddReport.module.css';
 
 const AddReport = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.reports);
-  const { user, token } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   const [showAuthMessage, setShowAuthMessage] = useState(false);
@@ -39,12 +39,40 @@ const AddReport = () => {
   const [advertSource, setAdvertSource] = useState('');
   const [category, setCategory] = useState('');
   const [customCategory, setCustomCategory] = useState('');
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const categoryRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (categoryRef.current && !categoryRef.current.contains(e.target)) {
+        setCategoryOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [flagged, setFlagged] = useState(false);
 
   const [files, setFiles] = useState([]);
   const [filePreviews, setFilePreviews] = useState([]);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  const [rights, setRights] = useState([]);
+  const [matchedLaws, setMatchedLaws] = useState([]);
+  const [councilEmail, setCouncilEmail] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    api.get('/rights').then(res => setRights(res.data.laws || [])).catch(() => {});
+  }, []);
+
+  const scanForRights = (text) => {
+    const lower = text.toLowerCase();
+    return rights.filter(law =>
+      law.triggerWords.some(word => lower.includes(word.toLowerCase()))
+    );
+  };
 
   const [success, setSuccess] = useState(false);
   const [fileError, setFileError] = useState('');
@@ -79,11 +107,8 @@ const AddReport = () => {
       const evidenceForm = new FormData();
       evidenceForm.append('file', f);
 
-      await axios.post(`/api/reports/${reportId}/evidence`, evidenceForm, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
+      await api.post(`/reports/${reportId}/evidence`, evidenceForm, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
     }
   };
@@ -147,6 +172,18 @@ const AddReport = () => {
         }
       }
 
+      const matched = scanForRights(`${title} ${description}`);
+      setMatchedLaws(matched);
+
+      let resolvedEmail = null;
+      if (city && matched.length > 0) {
+        try {
+          const emailRes = await api.get('/council-email', { params: { city } });
+          resolvedEmail = emailRes.data.email || null;
+        } catch {}
+      }
+      setCouncilEmail(resolvedEmail);
+      setShowModal(true);
       setSuccess(true);
 
       setTitle('');
@@ -338,25 +375,52 @@ const AddReport = () => {
           <label className={styles.label}>
             Category <span style={{ color: '#e74c3c' }}>*</span>:
           </label>
-          <select
-            className={styles.input}
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-          >
-            <option value="">Select a category</option>
-            <option value="Health Hazard">Health Hazard</option>
-            <option value="Security Hazard">Security Hazard</option>
-            <option value="Fire Hazard">Fire Hazard</option>
-            <option value="Structural Hazard">Structural Hazard</option>
-            <option value="Environmental Hazard">Environmental Hazard</option>
-            <option value="Other">Other (please specify)</option>
-          </select>
+          <div className={styles.customSelect} ref={categoryRef}>
+            <button
+              type="button"
+              className={styles.customSelectTrigger}
+              onClick={() => setCategoryOpen(o => !o)}
+            >
+              <span className={category ? undefined : styles.customSelectTriggerPlaceholder}>
+                {category || 'Select a category'}
+              </span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4 6l4 4 4-4" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {categoryOpen && (
+              <div className={styles.customSelectMenu}>
+                <div className={styles.customSelectGroup}>Negative / Hazard</div>
+                {['Health Hazard','Security Hazard','Fire Hazard','Structural Hazard','Environmental Hazard'].map(opt => (
+                  <div
+                    key={opt}
+                    className={`${styles.customSelectOption} ${category === opt ? styles.customSelectOptionSelected : ''}`}
+                    onMouseDown={() => { setCategory(opt); setCategoryOpen(false); }}
+                  >{opt}</div>
+                ))}
+                <div className={styles.customSelectGroup}>Positive</div>
+                {['Well Maintained Property','Responsive Landlord','Fair Rent','Safe and Secure','Good Condition'].map(opt => (
+                  <div
+                    key={opt}
+                    className={`${styles.customSelectOption} ${category === opt ? styles.customSelectOptionSelected : ''}`}
+                    onMouseDown={() => { setCategory(opt); setCategoryOpen(false); }}
+                  >{opt}</div>
+                ))}
+                <div className={styles.customSelectGroup}>Other</div>
+                <div
+                  className={`${styles.customSelectOption} ${category === 'Other' ? styles.customSelectOptionSelected : ''}`}
+                  onMouseDown={() => { setCategory('Other'); setCategoryOpen(false); }}
+                >Other (please specify)</div>
+              </div>
+            )}
+          </div>
 
           {category === 'Other' && (
             <input
               type="text"
               className={styles.input}
+              style={{ marginTop: '0.5rem' }}
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
               placeholder="Please specify category"
@@ -446,10 +510,62 @@ const AddReport = () => {
         </button>
 
         {error && <div className={styles.error}>{error}</div>}
-        {success && (
-          <div className={styles.success}>Report submitted successfully!</div>
-        )}
       </form>
+
+      {showModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <button className={styles.modalCloseBtn} onClick={() => setShowModal(false)}>✕</button>
+
+            <div className={styles.modalSuccess}>
+              <span>✓</span> Report submitted successfully!
+            </div>
+
+            {matchedLaws.length > 0 && (
+              <>
+                <div className={styles.rightsHeader}>
+                  Based on your report, here are your rights under the Renters' Rights Act 2025/2026:
+                </div>
+                {matchedLaws.map(law => (
+                  <div key={law.id} className={styles.rightsCard}>
+                    <div className={styles.rightsCardCategory}>{law.category}</div>
+                    <div className={styles.rightsCardThreshold}>{law.threshold_condition}</div>
+                    <div className={styles.rightsCardFeedback}>{law.feedback}</div>
+                    <div className={styles.rightsCardAction}>
+                      <strong>What to do: {law.emergencyAction.entity}</strong>
+                      <div className={styles.rightsCardActionRow}>
+                        {(() => {
+                          const isPlaceholder = law.emergencyAction.email?.includes('yourlocalcouncil.gov.uk');
+                          if (isPlaceholder) {
+                            return councilEmail
+                              ? <a href={`mailto:${councilEmail}`}>{councilEmail}</a>
+                              : <a href="https://www.gov.uk/find-local-council" target="_blank" rel="noopener noreferrer">Find your local council →</a>;
+                          }
+                          return law.emergencyAction.email
+                            ? <a href={`mailto:${law.emergencyAction.email}`}>{law.emergencyAction.email}</a>
+                            : null;
+                        })()}
+                        {(() => {
+                          const isPlaceholder = law.emergencyAction.helpline === 'Contact Local Council';
+                          if (isPlaceholder) {
+                            return councilEmail
+                              ? null
+                              : <a href="https://www.gov.uk/find-local-council" target="_blank" rel="noopener noreferrer">Find your local council</a>;
+                          }
+                          return law.emergencyAction.helpline
+                            ? <span>📞 {law.emergencyAction.helpline}</span>
+                            : null;
+                        })()}
+                      </div>
+                      <div>{law.emergencyAction.instructions}</div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

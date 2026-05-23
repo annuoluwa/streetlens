@@ -6,7 +6,7 @@ import api from '../utils/api';
 import { deleteReport as deleteReportApi } from '../utils/deleteReport';
 import styles from './ReportDetailsPage.module.css';
 import LogoSpinner from '../components/Spinner/LogoSpinner';
-import { resolveEvidenceImageUrl } from '../utils/getImageUrl';
+import { resolveEvidenceImageUrl, CLOUDINARY_TRANSFORMS } from '../utils/getImageUrl';
 
 const ReportDetailsPage = () => {
   const { id } = useParams();
@@ -40,6 +40,9 @@ const ReportDetailsPage = () => {
 
   const [currentImage, setCurrentImage] = useState(0);
   const [comments, setComments] = useState([]);
+  const [commentTotal, setCommentTotal] = useState(0);
+  const [commentPage, setCommentPage] = useState(1);
+  const [commentTotalPages, setCommentTotalPages] = useState(1);
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -60,17 +63,19 @@ const ReportDetailsPage = () => {
     fetchReport();
   }, [id]);
 
-  // Fetch comments for this report
-  const fetchComments = async () => {
+  const fetchComments = async (page = 1) => {
     try {
-      const res = await api.get(`/reports/${id}/comments`);
-      setComments(res.data);
+      const res = await api.get(`/reports/${id}/comments`, { params: { page, limit: 20 } });
+      setComments(res.data.data);
+      setCommentTotal(res.data.total);
+      setCommentPage(res.data.page);
+      setCommentTotalPages(res.data.totalPages);
     } catch (err) {
       //  handle error
     }
   };
   useEffect(() => {
-    if (id) fetchComments();
+    if (id) fetchComments(1);
     // eslint-disable-next-line
   }, [id]);
 
@@ -86,7 +91,8 @@ const ReportDetailsPage = () => {
     if (!image) return null;
     return resolveEvidenceImageUrl({
       evidenceUrl: image.file_url,
-      evidenceFileName: image.file_name
+      evidenceFileName: image.file_name,
+      transform: CLOUDINARY_TRANSFORMS.display
     });
   };
 
@@ -127,7 +133,7 @@ const ReportDetailsPage = () => {
                   setReplyContent('');
                   setReplyIsAnonymous(false);
                   setReplyTo(null);
-                  fetchComments();
+                  fetchComments(commentPage);
                 } catch (err) {
                   //  handle error
                 }
@@ -218,7 +224,7 @@ const ReportDetailsPage = () => {
       <div className="card shadow p-4">
         <h3 className="mb-3 d-flex align-items-center gap-2">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{height: '1.5em'}}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Comments <span className="fw-normal text-primary">({comments.length})</span>
+          Comments <span className="fw-normal text-primary">({commentTotal})</span>
         </h3>
         <form
           className="mb-3"
@@ -232,7 +238,7 @@ const ReportDetailsPage = () => {
               });
               setNewComment('');
               setIsAnonymous(false);
-              fetchComments();
+              fetchComments(1);
             } catch (err) {
               //  handle error
             }
@@ -262,6 +268,25 @@ const ReportDetailsPage = () => {
         <div>
           {renderComments(comments)}
         </div>
+        {commentTotalPages > 1 && (
+          <div className="d-flex justify-content-center align-items-center gap-3 mt-3">
+            <button
+              className="btn btn-outline-secondary btn-sm"
+              disabled={commentPage <= 1}
+              onClick={() => fetchComments(commentPage - 1)}
+            >
+              Previous
+            </button>
+            <span className="small text-muted">Page {commentPage} of {commentTotalPages}</span>
+            <button
+              className="btn btn-outline-secondary btn-sm"
+              disabled={commentPage >= commentTotalPages}
+              onClick={() => fetchComments(commentPage + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

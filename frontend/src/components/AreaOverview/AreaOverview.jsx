@@ -27,7 +27,7 @@ const AreaOverview = () => {
 									<h5 className="card-title">{report.title}</h5>
 									<p className="card-text">{report.description}</p>
 									<p className="card-text mb-1"><span className="fw-semibold">Location:</span> {report.location}</p>
-									<p className="card-text"><span className="fw-semibold">Date:</span> {report.createdAt ? new Date(report.createdAt).toLocaleString() : 'N/A'}</p>
+									<p className="card-text"><span className="fw-semibold">Date:</span> {report.created_at ? new Date(report.created_at).toLocaleString() : 'N/A'}</p>
 								</div>
 							</div>
 						</div>

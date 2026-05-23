@@ -3,6 +3,7 @@ import api from '../utils/api';
 
 const initialState = {
   reports: [],
+  total: 0,
   loading: false,
   error: null,
 };
@@ -14,12 +15,12 @@ export const fetchReports = createAsyncThunk(
       const response = await api.get('/reports', { params });
       const payload = response.data;
       if (Array.isArray(payload)) {
-        return payload;
+        return { reports: payload, total: payload.length };
       }
       if (Array.isArray(payload?.data)) {
-        return payload.data;
+        return { reports: payload.data, total: payload.total ?? payload.data.length };
       }
-      return [];
+      return { reports: [], total: 0 };
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || error.message || 'Failed to fetch reports'
@@ -54,7 +55,8 @@ const reportSlice = createSlice({
       })
       .addCase(fetchReports.fulfilled, (state, action) => {
         state.loading = false;
-        state.reports = action.payload || [];
+        state.reports = action.payload.reports || [];
+        state.total = action.payload.total || 0;
       })
       .addCase(fetchReports.rejected, (state, action) => {
         state.loading = false;

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const formatDate = (report) => {
-  const rawDate = report.created_at || report.createdAt;
+  const rawDate = report.created_at;
   if (!rawDate) return 'N/A';
 
   const parsedDate = new Date(rawDate);

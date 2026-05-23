@@ -57,8 +57,8 @@ const AreaOverview = () => {
 		if (category) filtered = filtered.filter(r => r.category === category);
 		if (flagged === 'flagged') filtered = filtered.filter(r => r.is_flagged === true);
 		if (flagged === 'not_flagged') filtered = filtered.filter(r => r.is_flagged === false);
-		if (sort === 'date-desc') filtered = filtered.slice().sort((a, b) => new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at));
-		if (sort === 'date-asc') filtered = filtered.slice().sort((a, b) => new Date(a.createdAt || a.created_at) - new Date(b.createdAt || b.created_at));
+		if (sort === 'date-desc') filtered = filtered.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+		if (sort === 'date-asc') filtered = filtered.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 		if (sort === 'title-az') filtered = filtered.slice().sort((a, b) => (a.title || '').localeCompare(b.title || ''));
 		if (sort === 'title-za') filtered = filtered.slice().sort((a, b) => (b.title || '').localeCompare(a.title || ''));
 		return filtered;
@@ -118,13 +118,7 @@ const AreaOverview = () => {
 											<h5 className="card-title">{report.title}</h5>
 											<p className="card-text">{report.description}</p>
 											<p className="card-text mb-1"><span className="fw-semibold">Location:</span> {report.city || report.location}</p>
-											<p className="card-text mb-1"><span className="fw-semibold">Date Posted:</span> {
-												report.createdAt
-													? new Date(report.createdAt).toLocaleString()
-													: report.created_at
-														? new Date(report.created_at).toLocaleString()
-														: 'N/A'
-											}</p>
+											<p className="card-text mb-1"><span className="fw-semibold">Date Posted:</span> {report.created_at ? new Date(report.created_at).toLocaleString() : 'N/A'}</p>
 										</div>
 									</div>
 								</div>
