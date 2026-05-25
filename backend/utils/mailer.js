@@ -1,23 +1,19 @@
-
 const nodemailer = require('nodemailer');
-require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
-  host: 'sandbox.smtp.mailtrap.io',
-  port: 587,
+  host: 'smtp.resend.com',
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.MAILTRAP_USER || '',
-    pass: process.env.MAILTRAP_PASS || process.env.mailtrap || ''
-  }
+    user: 'resend',
+    pass: process.env.RESEND_API_KEY,
+  },
 });
 
-/**
- * Sends an email using Mailtrap.
- * @param {Object} options - Nodemailer mail options (to, subject, text, html)
- * @returns {Promise}
- */
+const FROM_ADDRESS = process.env.RESEND_FROM || 'StreetLens <onboarding@resend.dev>';
+
 function sendMail(options) {
-  return transporter.sendMail(options);
+  return transporter.sendMail({ from: FROM_ADDRESS, ...options });
 }
 
 module.exports = sendMail;
