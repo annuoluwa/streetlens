@@ -43,6 +43,10 @@ const Profile = () => {
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setResetMessage('');
+    if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      setResetMessage('Password must be at least 8 characters and include a letter and a number.');
+      return;
+    }
     if (newPassword !== confirmPassword) {
       setResetMessage('New passwords do not match.');
       return;

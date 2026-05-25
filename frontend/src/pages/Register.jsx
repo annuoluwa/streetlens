@@ -14,6 +14,7 @@ const Register = () => {
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const [success, setSuccess] = useState(false);
+	const [localError, setLocalError] = useState('');
 
 	const handleEyeClick = () => setShowPassword((prev) => !prev);
 
@@ -29,6 +30,11 @@ const Register = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
+		setLocalError('');
+		if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+			setLocalError('Password must be at least 8 characters and include a letter and a number.');
+			return;
+		}
 		dispatch(registerUser({ username, email, password }));
 	};
 
@@ -97,7 +103,9 @@ const Register = () => {
 								)}
 							</button>
 						</div>
-						{error && <div className="alert alert-danger py-2">{error}</div>}
+						{(localError || error) && (
+							<div className="alert alert-danger py-2">{localError || error}</div>
+						)}
 						<button type="submit" className="btn btn-primary w-100 mb-2" disabled={loading}>
 							{loading ? 'Registering...' : 'Register'}
 						</button>
