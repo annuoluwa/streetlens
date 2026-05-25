@@ -7,7 +7,7 @@ const isStrongPassword = (pw) =>
 const sendMail = require('../utils/mailer');
 const logger = require('../logger');
 
-const FRONTEND = FRONTEND || 'https://streetlens.kagex.co.uk';
+const FRONTEND = process.env.FRONTEND_URL || 'https://streetlens.kagex.co.uk';
 
 
 const register = async (req, res) => {
