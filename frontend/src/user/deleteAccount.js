@@ -1,16 +1,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const URL = `${process.env.REACT_APP_API_URL}/api/users`;
+import api from '../utils/api';
 
 export const deleteAccount = createAsyncThunk(
   'user/deleteAccount',
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const { token } = getState().user;
-      await axios.delete(`${URL}/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete('/users/me');
       return true;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Account deletion failed');
