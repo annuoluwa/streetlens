@@ -76,6 +76,12 @@ const userSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
     },
+    markEmailVerified: (state) => {
+      if (state.user) {
+        state.user.email_verified = true;
+        localStorage.setItem('user', JSON.stringify(state.user));
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -126,5 +132,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { logout, setUser } = userSlice.actions;
+export const { logout, setUser, markEmailVerified } = userSlice.actions;
 export default userSlice.reducer;

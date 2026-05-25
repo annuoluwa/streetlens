@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import api from '../utils/api';
+import { markEmailVerified } from '../user/userSlice';
 
 const VerifyEmail = () => {
   const { token } = useParams();
+  const dispatch = useDispatch();
   const [status, setStatus] = useState('loading');
 
   useEffect(() => {
     api.get(`/auth/verify-email/${token}`)
-      .then(() => setStatus('success'))
+      .then(() => {
+        dispatch(markEmailVerified());
+        setStatus('success');
+      })
       .catch(() => setStatus('error'));
-  }, [token]);
+  }, [token, dispatch]);
 
   return (
     <div style={{ maxWidth: 480, margin: '4rem auto', padding: '2rem', textAlign: 'center' }}>
