@@ -1,16 +1,18 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.resend.com',
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
+    user: 'resend',
+    pass: process.env.RESEND_API_KEY,
   },
 });
 
 function sendMail(options) {
   return transporter.sendMail({
-    from: `StreetLens <${process.env.MAIL_USER}>`,
+    from: process.env.RESEND_FROM || 'StreetLens <onboarding@resend.dev>',
     ...options,
   });
 }
