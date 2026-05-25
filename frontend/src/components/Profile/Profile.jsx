@@ -16,6 +16,7 @@ const Profile = () => {
   const [resetMessage, setResetMessage] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   const handleDeleteAccount = async () => {
     setDeleteError('');
     try {
@@ -78,8 +79,19 @@ const Profile = () => {
     <div className={styles.profileContainer}>
       <h2>My Profile</h2>
       {!user.email_verified && (
-        <div style={{ background: '#fff8e1', border: '1px solid #f0ad4e', borderRadius: 6, padding: '0.75rem 1rem', marginBottom: '1rem', color: '#856404' }}>
-          <strong>Please verify your email.</strong> Check your inbox for a verification link from StreetLens.
+        <div style={{ background: '#fff8e1', border: '1px solid #f0ad4e', borderRadius: 6, padding: '0.75rem 1rem', marginBottom: '1rem', color: '#856404', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <span><strong>Please verify your email.</strong> Check your inbox for a verification link from StreetLens.</span>
+          <button
+            style={{ background: 'none', border: '1px solid #f0ad4e', borderRadius: 4, color: '#856404', padding: '2px 10px', cursor: 'pointer', fontSize: '0.85rem' }}
+            disabled={refreshing}
+            onClick={async () => {
+              setRefreshing(true);
+              await dispatch(refreshUser());
+              setRefreshing(false);
+            }}
+          >
+            {refreshing ? 'Checking…' : 'I\'ve verified — refresh'}
+          </button>
         </div>
       )}
       <div className={styles.infoGroup}><strong>Email:</strong> {user.email}</div>
