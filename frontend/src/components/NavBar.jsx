@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../user/userSlice';
 import { fetchFlaggedReportsCount } from '../report/flaggedReportsSlice';
@@ -12,7 +12,12 @@ const NavBar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const location = useLocation();
   const [navCollapsed, setNavCollapsed] = useState(true);
+
+  useEffect(() => {
+    setNavCollapsed(true);
+  }, [location]);
 
   useEffect(() => {
     if (user && user.role === 'admin' && token) {
