@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push *)",
+      "Bash(git ls-tree *)",
+      "Bash(node -e \"require\\('./backend/routes/rightsRoutes.js'\\); console.log\\('OK'\\)\")",
+      "Bash(node -e \"require\\('./backend/models/reportModel.js'\\); console.log\\('OK'\\)\")",
+      "Bash(node -e \"require\\('./server.js'\\); console.log\\('Server module loaded OK'\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)"
+    ]
+  }
+}
