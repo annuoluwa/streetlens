@@ -7,6 +7,8 @@ const isStrongPassword = (pw) =>
 const sendMail = require('../utils/mailer');
 const logger = require('../logger');
 
+const FRONTEND = FRONTEND || 'https://streetlens.kagex.co.uk';
+
 
 const register = async (req, res) => {
     try {
@@ -25,7 +27,7 @@ const register = async (req, res) => {
         const newUser = await createUser(username, email, hashedPassword);
 
         const verificationToken = await setVerificationToken(newUser.id);
-        const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
+        const verifyUrl = `${FRONTEND}/verify-email/${verificationToken}`;
         sendMail({
             to: email,
             subject: 'StreetLens — Verify your email',
@@ -111,7 +113,7 @@ const forgotPassword = async (req, res) => {
         const token = await setResetToken(email);
 
         if (token) {
-            const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+            const resetUrl = `${FRONTEND}/reset-password/${token}`;
             try {
                 await sendMail({
                     from: process.env.CONTACT_EMAIL || process.env.MAILTRAP_USER,
