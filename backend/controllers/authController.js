@@ -1,35 +1,46 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { createUser, findUserByEmail, findUserById, updateUserPassword, setResetToken, findUserByResetToken, clearResetToken } = require('../models/userModel');
+const { createUser, findUserByEmail, findUserById, updateUserPassword, setResetToken, findUserByResetToken, clearResetToken, setVerificationToken, verifyEmailToken } = require('../models/userModel');
+
+const isStrongPassword = (pw) =>
+    pw && pw.length >= 8 && /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw);
 const sendMail = require('../utils/mailer');
 const logger = require('../logger');
 
 
 const register = async (req, res) => {
     try {
-        const {username, email, password} = req.body;
+        const { username, email, password } = req.body;
 
-        //check if user already exists
-
-        const existingUser = await findUserByEmail(email);
-        if(existingUser) {
-            return res.status(400).json({message: 'User already exists'});
+        if (!isStrongPassword(password)) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters and include a letter and a number.' });
         }
 
-        //hash password
+        const existingUser = await findUserByEmail(email);
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
 
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await createUser(username, email, hashedPassword);
 
-        //create user
+        const verificationToken = await setVerificationToken(newUser.id);
+        const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
+        sendMail({
+            to: email,
+            subject: 'StreetLens — Verify your email',
+            text: `Welcome to StreetLens! Please verify your email:\n\n${verifyUrl}`,
+            html: `<p>Welcome to StreetLens!</p><p><a href="${verifyUrl}">Verify your email address</a></p>`,
+        }).catch(err => logger.error(`Verification email failed: ${err.message}`));
 
-        const newUser =await createUser(username, email, hashedPassword);
-
-        //create JWT token
         const token = jwt.sign({ id: newUser.id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        res.status(201).json({ user: { id: newUser.id, username: newUser.username, email: newUser.email, role: newUser.role }, token });
-    }catch(err) {
-        res.status(500).json({message: 'Server error'});
+        res.status(201).json({
+            user: { id: newUser.id, username: newUser.username, email: newUser.email, role: newUser.role, email_verified: false },
+            token,
+        });
+    } catch (err) {
+        logger.error(err);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -53,7 +64,7 @@ const login = async (req, res) => {
             expiresIn: '7d',
         });
 
-        res.json({ user: { id: user.id, username: user.username, email: user.email, role: user.role }, token });
+        res.json({ user: { id: user.id, username: user.username, email: user.email, role: user.role, email_verified: user.email_verified }, token });
 
     } catch(err) {
 
@@ -68,6 +79,9 @@ const resetPassword = async (req, res) => {
         const { oldPassword, newPassword } = req.body;
         if (!oldPassword || !newPassword) {
             return res.status(400).json({ message: 'Old and new password required.' });
+        }
+        if (!isStrongPassword(newPassword)) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters and include a letter and a number.' });
         }
         // Find user
         const user = await findUserById(userId);
@@ -144,10 +158,25 @@ const resetPasswordByToken = async (req, res) => {
     }
 };
 
+const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const verified = await verifyEmailToken(token);
+        if (!verified) {
+            return res.status(400).json({ message: 'Invalid or already used verification link.' });
+        }
+        res.json({ message: 'Email verified successfully.' });
+    } catch (err) {
+        logger.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     register,
     login,
     resetPassword,
     forgotPassword,
     resetPasswordByToken,
+    verifyEmail,
 };

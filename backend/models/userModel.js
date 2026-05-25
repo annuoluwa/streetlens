@@ -53,6 +53,23 @@ const updateUserPassword = async (id, hashedPassword) => {
     return result.rows[0];
 };
 
+const setVerificationToken = async (userId) => {
+    const token = crypto.randomBytes(32).toString('hex');
+    await pool.query(
+        'UPDATE users SET email_verification_token = $1 WHERE id = $2',
+        [token, userId]
+    );
+    return token;
+};
+
+const verifyEmailToken = async (token) => {
+    const result = await pool.query(
+        'UPDATE users SET email_verified = TRUE, email_verification_token = NULL WHERE email_verification_token = $1 RETURNING id',
+        [token]
+    );
+    return result.rowCount > 0;
+};
+
 const setResetToken = async (email) => {
     const token = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
@@ -88,4 +105,6 @@ module.exports = {
     setResetToken,
     findUserByResetToken,
     clearResetToken,
+    setVerificationToken,
+    verifyEmailToken,
 };

@@ -70,6 +70,11 @@ const Profile = () => {
   return (
     <div className={styles.profileContainer}>
       <h2>My Profile</h2>
+      {user.email_verified === false && (
+        <div style={{ background: '#fff8e1', border: '1px solid #f0ad4e', borderRadius: 6, padding: '0.75rem 1rem', marginBottom: '1rem', color: '#856404' }}>
+          <strong>Please verify your email.</strong> Check your inbox for a verification link from StreetLens.
+        </div>
+      )}
       <div className={styles.infoGroup}><strong>Email:</strong> {user.email}</div>
       <div className={styles.infoGroup}><strong>Username:</strong> {user.username || 'N/A'}</div>
       <button className={styles.button} onClick={handleLogout}>Logout</button>
