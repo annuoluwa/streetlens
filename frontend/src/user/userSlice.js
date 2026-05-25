@@ -40,6 +40,22 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+export const refreshUser = createAsyncThunk(
+  'user/refresh',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const { token } = getState().user;
+      if (!token) return rejectWithValue('No token');
+      const res = await axios.get(`${URL}/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    } catch (err) {
+      return rejectWithValue('Refresh failed');
+    }
+  }
+);
+
 export const resetPassword = createAsyncThunk(
   'user/resetPassword',
   async ({ oldPassword, newPassword }, { getState, rejectWithValue }) => {
@@ -115,6 +131,11 @@ const userSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      .addCase(refreshUser.fulfilled, (state, action) => {
+        state.user = { ...state.user, ...action.payload };
+        localStorage.setItem('user', JSON.stringify(state.user));
       })
 
       .addCase(resetPassword.pending, (state) => {

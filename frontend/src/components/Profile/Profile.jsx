@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout, resetPassword } from '../../user/userSlice';
+import { logout, resetPassword, refreshUser } from '../../user/userSlice';
 import { deleteAccount } from '../../user/deleteAccount';
 import { fetchReports } from '../../report/reportSlice';
 import styles from './Profile.module.css';
@@ -29,8 +29,11 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       dispatch(fetchReports());
+      if (!user.email_verified) {
+        dispatch(refreshUser());
+      }
     }
-  }, [dispatch, user]);
+  }, [dispatch, user?.id]);
 
   if (!user) {
     return <div className={styles.profileContainer}>You must be signed in to view your profile.</div>;

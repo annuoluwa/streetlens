@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { register, login, resetPassword, forgotPassword, resetPasswordByToken, verifyEmail } = require('../controllers/authController');
+const { register, login, resetPassword, forgotPassword, resetPasswordByToken, verifyEmail, getMe } = require('../controllers/authController');
 const { protect } = require('../middleware/protect');
 
 //POST/api/auth/register
@@ -9,6 +9,9 @@ router.post('/register', register);
 
 //POST/api/auth/login
 router.post('/login', login);
+
+//GET/api/auth/me (authenticated — get current user)
+router.get('/me', protect, getMe);
 
 //POST/api/auth/reset-password (authenticated — change password from profile)
 router.post('/reset-password', protect, resetPassword);
