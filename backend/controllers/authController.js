@@ -163,10 +163,16 @@ const resetPasswordByToken = async (req, res) => {
 const verifyEmail = async (req, res) => {
     try {
         const { token } = req.params;
-        const verified = await verifyEmailToken(token);
-        if (!verified) {
+        const user = await verifyEmailToken(token);
+        if (!user) {
             return res.status(400).json({ message: 'Invalid or already used verification link.' });
         }
+        sendMail({
+            to: user.email,
+            subject: 'Welcome to StreetLens',
+            text: `Hi ${user.username},\n\nYour email is confirmed. You can now submit reports, know your rights, and hold landlords accountable.\n\nWelcome to StreetLens.\n\n${FRONTEND}`,
+            html: `<p>Hi ${user.username},</p><p>Your email is confirmed. You can now submit reports, know your rights, and hold landlords accountable.</p><p>Welcome to StreetLens.</p><p><a href="${FRONTEND}">Go to StreetLens</a></p>`,
+        }).catch(err => logger.error(`Welcome email failed: ${err.message}`));
         res.json({ message: 'Email verified successfully.' });
     } catch (err) {
         logger.error(err);

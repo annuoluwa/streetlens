@@ -64,10 +64,10 @@ const setVerificationToken = async (userId) => {
 
 const verifyEmailToken = async (token) => {
     const result = await pool.query(
-        'UPDATE users SET email_verified = TRUE, email_verification_token = NULL WHERE email_verification_token = $1 RETURNING id',
+        'UPDATE users SET email_verified = TRUE, email_verification_token = NULL WHERE email_verification_token = $1 RETURNING id, username, email',
         [token]
     );
-    return result.rowCount > 0;
+    return result.rows[0] || null;
 };
 
 const setResetToken = async (email) => {
