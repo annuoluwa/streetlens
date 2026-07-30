@@ -20,11 +20,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com", "https://www.googletagmanager.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com", "https://www.googletagmanager.com", "https://www.facebook.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://connect.facebook.net"],
       scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      connectSrc: ["'self'", "https://*.google-analytics.com", "https://*.analytics.google.com"],
+      connectSrc: ["'self'", "https://*.google-analytics.com", "https://*.analytics.google.com", "https://www.facebook.com"],
     },
   },
   // Allow resources (like images) to be used cross-origin
