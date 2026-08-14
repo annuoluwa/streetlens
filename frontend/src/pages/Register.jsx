@@ -21,6 +21,7 @@ const Register = () => {
 	useEffect(() => {
 		if (user) {
 			setSuccess(true);
+			if (window.fbq) window.fbq('track', 'CompleteRegistration');
 			//redirect after a short delay
 			setTimeout(() => {
 				navigate('/login'); // Redirect to login after registration
