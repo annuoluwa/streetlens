@@ -1,6 +1,7 @@
 const pool = require('../db/db');
 const reportModel = require('../models/reportModel');
 const logger = require('../logger');
+const { sendCapiEvent } = require('../utils/metaCapi');
 
 const { countRecentReports, flagRecentReports } = require('../models/reportModel');
 const { sendAdminFlaggedNotification } = require('../utils/adminNotify');
@@ -238,6 +239,14 @@ const getReportById = async (req, res) => {
     );
 
     report.evidence_files = evidenceRes.rows;
+
+    sendCapiEvent({
+      eventName: 'ViewContent',
+      sourceUrl: `${process.env.FRONTEND_URL || 'https://streetlens.kagex.co.uk'}/report/${id}`,
+      eventId: req.headers['x-event-id'] || undefined,
+      customData: { content_ids: [String(id)], content_type: 'product' },
+      req,
+    }).catch(err => logger.error(`CAPI ViewContent failed: ${err.message}`));
 
     res.status(200).json(report);
   } catch (error) {

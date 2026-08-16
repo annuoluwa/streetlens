@@ -30,7 +30,7 @@ export const registerUser = createAsyncThunk(
   'user/register',
   async (userData, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${URL}/register`, userData);
+      const res = await axios.post(`${URL}/register`, userData); // userData may include eventId
       return res.data;
     } catch (err) {
       return rejectWithValue(

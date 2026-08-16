@@ -6,6 +6,7 @@ const isStrongPassword = (pw) =>
     pw && pw.length >= 8 && /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw);
 const sendMail = require('../utils/mailer');
 const logger = require('../logger');
+const { sendCapiEvent } = require('../utils/metaCapi');
 
 const FRONTEND = process.env.FRONTEND_URL || 'https://streetlens.kagex.co.uk';
 
@@ -36,6 +37,15 @@ const register = async (req, res) => {
         }).catch(err => logger.error(`Verification email failed: ${err.message}`));
 
         const token = jwt.sign({ id: newUser.id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+        sendCapiEvent({
+            eventName: 'CompleteRegistration',
+            sourceUrl: `${FRONTEND}/register`,
+            eventId: req.body.eventId || undefined,
+            userData: { email },
+            req,
+        }).catch(err => logger.error(`CAPI CompleteRegistration failed: ${err.message}`));
+
         res.status(201).json({
             user: { id: newUser.id, username: newUser.username, email: newUser.email, role: newUser.role, email_verified: false },
             token,

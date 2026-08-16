@@ -20,8 +20,10 @@ const Contact = () => {
     }
 
     setSubmitting(true);
+    const eventId = crypto.randomUUID();
     try {
-      await api.post('/contact', { name, email, message });
+      await api.post('/contact', { name, email, message, eventId });
+      if (window.fbq) window.fbq('track', 'Lead', {}, { eventID: eventId });
       setSuccess('Thanks for reaching out. Your message has been sent.');
       setName('');
       setEmail('');

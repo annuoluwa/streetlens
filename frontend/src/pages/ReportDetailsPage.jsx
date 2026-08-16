@@ -99,8 +99,10 @@ const ReportDetailsPage = () => {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await api.get(`/reports/${id}`);
+        const eventId = crypto.randomUUID();
+        const res = await api.get(`/reports/${id}`, { headers: { 'x-event-id': eventId } });
         setReport(res.data);
+        if (window.fbq) window.fbq('track', 'ViewContent', {}, { eventID: eventId });
       } catch (err) {
         setError('Failed to load report details');
       } finally {

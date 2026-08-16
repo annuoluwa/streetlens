@@ -1,5 +1,6 @@
 const sendMail = require('../utils/mailer');
 const logger = require('../logger');
+const { sendCapiEvent } = require('../utils/metaCapi');
 
 const sendContactMessage = async (req, res) => {
   try {
@@ -19,6 +20,14 @@ const sendContactMessage = async (req, res) => {
       subject: `StreetLens contact: ${name}`,
       text: `From: ${name} <${email}>\n\nMessage:\n${message}`,
     });
+
+    sendCapiEvent({
+      eventName: 'Lead',
+      sourceUrl: `${process.env.FRONTEND_URL || 'https://streetlens.kagex.co.uk'}/contact`,
+      eventId: req.body.eventId || undefined,
+      userData: { email },
+      req,
+    }).catch(err => logger.error(`CAPI Lead failed: ${err.message}`));
 
     return res.status(200).json({ message: 'Message sent successfully.' });
   } catch (error) {

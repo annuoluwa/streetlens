@@ -15,19 +15,20 @@ const Register = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [localError, setLocalError] = useState('');
+	const [registrationEventId, setRegistrationEventId] = useState(null);
 
 	const handleEyeClick = () => setShowPassword((prev) => !prev);
 
 	useEffect(() => {
 		if (user) {
 			setSuccess(true);
-			if (window.fbq) window.fbq('track', 'CompleteRegistration');
+			if (window.fbq) window.fbq('track', 'CompleteRegistration', {}, { eventID: registrationEventId });
 			//redirect after a short delay
 			setTimeout(() => {
 				navigate('/login'); // Redirect to login after registration
 			}, 1500);
 		}
-	}, [user, navigate]);
+	}, [user, navigate, registrationEventId]);
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -36,7 +37,9 @@ const Register = () => {
 			setLocalError('Password must be at least 8 characters and include a letter and a number.');
 			return;
 		}
-		dispatch(registerUser({ username, email, password }));
+		const eventId = crypto.randomUUID();
+		setRegistrationEventId(eventId);
+		dispatch(registerUser({ username, email, password, eventId }));
 	};
 
 		return (
