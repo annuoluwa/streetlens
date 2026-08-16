@@ -54,8 +54,21 @@ const Register = () => {
 					backgroundColor: 'rgba(255,255,255,0.7)',
 				}}
 			>
-				<div className="card p-4 shadow" style={{ minWidth: 340, maxWidth: 400, width: '100%', background: 'rgba(255,255,255,0.85)', border: 'none' }}>
-					<h2 className="mb-4 text-center">Register</h2>
+				<div className="card p-4 shadow" style={{ minWidth: 340, maxWidth: 420, width: '100%', background: 'rgba(255,255,255,0.85)', border: 'none' }}>
+					<h2 className="mb-2 text-center">Create your free StreetLens account</h2>
+					<p className="text-center text-muted mb-3">
+						Join the StreetLens community and help make UK housing more transparent.
+					</p>
+					<p className="fw-semibold mb-1">Your account lets you:</p>
+					<ul className="mb-3 ps-3">
+						<li>Submit housing reports</li>
+						<li>Keep track of your submissions</li>
+						<li>Explore reports from other renters</li>
+						<li>Contribute anonymously to the public housing picture</li>
+					</ul>
+					<p className="text-muted small mb-4">
+						Your report can be submitted anonymously. Your personal details are not published with your report.
+					</p>
 					<form onSubmit={handleSubmit}>
 						<div className="mb-3">
 							<label className="form-label">Username</label>
