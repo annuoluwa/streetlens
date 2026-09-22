@@ -61,6 +61,11 @@ const AddReport = () => {
   const [description, setDescription] = useState('');
   const [city, setCity] = useState('');
   const [postcode, setPostcode] = useState('');
+  const [postcodeSuggestions, setPostcodeSuggestions] = useState([]);
+  const [postcodeOpen, setPostcodeOpen] = useState(false);
+  const [postcodeError, setPostcodeError] = useState('');
+  const postcodeRef = useRef(null);
+  const postcodeDebounceRef = useRef(null);
   const [street, setStreet] = useState('');
   const [flatNumber, setFlatNumber] = useState('');
   const [propertyType, setPropertyType] = useState('');
@@ -76,10 +81,52 @@ const AddReport = () => {
       if (categoryRef.current && !categoryRef.current.contains(e.target)) {
         setCategoryOpen(false);
       }
+      if (postcodeRef.current && !postcodeRef.current.contains(e.target)) {
+        setPostcodeOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (postcodeDebounceRef.current) clearTimeout(postcodeDebounceRef.current);
+    };
+  }, []);
+
+  const handlePostcodeChange = (e) => {
+    const value = e.target.value.toUpperCase();
+    setPostcode(value);
+    setPostcodeError('');
+
+    if (postcodeDebounceRef.current) clearTimeout(postcodeDebounceRef.current);
+
+    const query = value.trim();
+    if (query.length < 2) {
+      setPostcodeSuggestions([]);
+      setPostcodeOpen(false);
+      return;
+    }
+
+    postcodeDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(query)}/autocomplete`);
+        const data = await res.json();
+        setPostcodeSuggestions(data?.result || []);
+        setPostcodeOpen(true);
+      } catch {
+        setPostcodeSuggestions([]);
+      }
+    }, 250);
+  };
+
+  const handlePostcodeSelect = (suggestion) => {
+    setPostcode(suggestion);
+    setPostcodeError('');
+    setPostcodeSuggestions([]);
+    setPostcodeOpen(false);
+  };
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [flagged, setFlagged] = useState(false);
 
@@ -151,6 +198,7 @@ const AddReport = () => {
     setTitleError('');
     setDescError('');
     setCityError('');
+    setPostcodeError('');
 
     let valid = true;
 
@@ -169,6 +217,18 @@ const AddReport = () => {
     if (!files.length) {
       setFileError('Evidence file is required.');
       valid = false;
+    }
+    if (postcode.trim()) {
+      try {
+        const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(postcode.trim())}/validate`);
+        const data = await res.json();
+        if (data && data.result === false) {
+          setPostcodeError('Please enter a valid UK postcode.');
+          valid = false;
+        }
+      } catch {
+        // postcodes.io unreachable - don't block submission on a network hiccup
+      }
     }
     if (!valid) return;
 
@@ -216,6 +276,9 @@ const AddReport = () => {
         setDescription('');
         setCity('');
         setPostcode('');
+        setPostcodeSuggestions([]);
+        setPostcodeOpen(false);
+        setPostcodeError('');
         setStreet('');
         setFlatNumber('');
         setPropertyType('');
@@ -330,15 +393,31 @@ const AddReport = () => {
 
         <div className={styles.formGroup}>
           <label className={styles.label}>Postcode:</label>
-          <input
-            className={styles.input}
-            type="text"
-            value={postcode}
-            onChange={(e) => setPostcode(e.target.value.toUpperCase())}
-            placeholder="e.g. SW1A 1AA"
-          />
+          <div className={styles.customSelect} ref={postcodeRef}>
+            <input
+              className={styles.input}
+              type="text"
+              value={postcode}
+              onChange={handlePostcodeChange}
+              onFocus={() => { if (postcodeSuggestions.length) setPostcodeOpen(true); }}
+              placeholder="e.g. SW1A 1AA"
+              autoComplete="off"
+            />
+            {postcodeOpen && postcodeSuggestions.length > 0 && (
+              <div className={styles.customSelectMenu}>
+                {postcodeSuggestions.map((suggestion) => (
+                  <div
+                    key={suggestion}
+                    className={styles.customSelectOption}
+                    onMouseDown={() => handlePostcodeSelect(suggestion)}
+                  >{suggestion}</div>
+                ))}
+              </div>
+            )}
+          </div>
+          {postcodeError && <div className={styles.error}>{postcodeError}</div>}
           <small style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
-            This will be visible on the public dashboard to show general area trends.
+            This will be visible on the public dashboard to show general area trends. Must be a valid UK postcode.
           </small>
         </div>
 
