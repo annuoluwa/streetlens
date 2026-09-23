@@ -88,6 +88,7 @@ const Register = () => {
 								className="form-control"
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
+								autoComplete="username"
 								required
 							/>
 						</div>
@@ -98,6 +99,7 @@ const Register = () => {
 								className="form-control"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
+								autoComplete="new-password"
 								required
 							/>
 							<button
