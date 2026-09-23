@@ -26,7 +26,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://connect.facebook.net"],
       scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      connectSrc: ["'self'", "https://*.google-analytics.com", "https://*.analytics.google.com", "https://www.facebook.com"],
+      connectSrc: ["'self'", "https://*.google-analytics.com", "https://*.analytics.google.com", "https://www.facebook.com", "https://api.postcodes.io"],
     },
   },
   // Allow resources (like images) to be used cross-origin
