@@ -202,6 +202,11 @@
   position: relative;
 }
 
+.customSelect input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .customSelectTrigger {
   width: 100%;
   padding: 0.7rem 1rem;
