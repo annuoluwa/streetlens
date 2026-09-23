@@ -503,7 +503,7 @@ const AddReport = () => {
             {categoryOpen && (
               <div className={styles.customSelectMenu}>
                 <div className={styles.customSelectGroup}>Negative / Hazard</div>
-                {['Health Hazard','Security Hazard','Fire Hazard','Structural Hazard','Environmental Hazard'].map(opt => (
+                {['Health Hazard','Security Hazard','Fire Hazard','Structural Hazard','Environmental Hazard','Overpriced / Misleading Listing'].map(opt => (
                   <div
                     key={opt}
                     className={`${styles.customSelectOption} ${category === opt ? styles.customSelectOptionSelected : ''}`}
