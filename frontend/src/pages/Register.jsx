@@ -23,6 +23,7 @@ const Register = () => {
 		if (user) {
 			setSuccess(true);
 			if (window.fbq) window.fbq('track', 'CompleteRegistration', {}, { eventID: registrationEventId });
+			if (window.gtag) window.gtag('event', 'sign_up', { method: 'email' });
 			//redirect after a short delay
 			setTimeout(() => {
 				navigate('/login'); // Redirect to login after registration
